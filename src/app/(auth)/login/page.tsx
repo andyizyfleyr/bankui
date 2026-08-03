@@ -6,6 +6,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Fingerprint, Loader2, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { NovaLogo } from "@/components/bank/nova-logo";
+import { authRequest } from "@/lib/auth-client";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -27,31 +28,13 @@ export default function LoginPage() {
     if (!valid || busy) return;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const text = await res.text();
-      let data: { error?: unknown } = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {}
-      if (!res.ok) {
-        setError(
-          typeof data.error === "string" && data.error
-            ? data.error
-            : `Erreur inattendue (code ${res.status})`
-        );
-        setBusy(false);
-        return;
-      }
-      router.push("/");
-    } catch {
-      setError("Connexion impossible, réessayez");
-      setBusy(false);
+    const res = await authRequest("/api/auth/login", { email, password });
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
     }
+    router.push("/");
   };
 
   return (

@@ -6,6 +6,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
 import { NovaLogo } from "@/components/bank/nova-logo";
+import { authRequest } from "@/lib/auth-client";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -28,31 +29,13 @@ export default function RegisterPage() {
     if (!valid || busy) return;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const text = await res.text();
-      let data: { error?: unknown } = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {}
-      if (!res.ok) {
-        setError(
-          typeof data.error === "string" && data.error
-            ? data.error
-            : `Erreur inattendue (code ${res.status})`
-        );
-        setBusy(false);
-        return;
-      }
-      router.push("/");
-    } catch {
-      setError("Connexion impossible, réessayez");
-      setBusy(false);
+    const res = await authRequest("/api/auth/register", { name, email, password });
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
     }
+    router.push("/");
   };
 
   const strength = Math.min(3, Math.floor(password.length / 4) + (/\d/.test(password) ? 1 : 0));
