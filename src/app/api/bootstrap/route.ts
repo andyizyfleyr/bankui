@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users, accounts, contacts, transactions } from "@/db/schema";
-import type { BootstrapData } from "@/lib/types";
+import type { BankUser, BootstrapData } from "@/lib/types";
+import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -13,33 +14,28 @@ function typeRank(type: string): number {
   return type === "courant" ? 0 : type === "epargne" ? 1 : 2;
 }
 
-/** Données de démonstration insérées au premier appel. */
-async function seed() {
-  const [user] = await db
-    .insert(users)
-    .values({ name: "Léa Moreau", email: "lea@nova.bank" })
-    .returning();
-
+/** Données de démonstration insérées au premier chargement d'un utilisateur. */
+async function seed(userId: string) {
   const [courant, epargne, livret] = await db
     .insert(accounts)
     .values([
-      { userId: user.id, name: "Compte Courant", type: "courant", balanceCents: 284_732, color: "#D7FF3E", last4: "4021" },
-      { userId: user.id, name: "Épargne", type: "epargne", balanceCents: 1_254_000, color: "#8B7CFF", last4: "8810" },
-      { userId: user.id, name: "Livret A", type: "livret", balanceCents: 510_218, color: "#5AD8C2", last4: "3342" },
+      { userId, name: "Compte Courant", type: "courant", balanceCents: 284_732, color: "#D7FF3E", last4: "4021" },
+      { userId, name: "Épargne", type: "epargne", balanceCents: 1_254_000, color: "#8B7CFF", last4: "8810" },
+      { userId, name: "Livret A", type: "livret", balanceCents: 510_218, color: "#5AD8C2", last4: "3342" },
     ])
     .returning();
 
   const people = await db
     .insert(contacts)
     .values([
-      { userId: user.id, name: "Camille Dupont", handle: "@camille.d", color: "#FF8A5C" },
-      { userId: user.id, name: "Thomas Roche", handle: "@thomas.r", color: "#8B7CFF" },
-      { userId: user.id, name: "Inès Benali", handle: "@ines.b", color: "#5AD8C2" },
-      { userId: user.id, name: "Maxime Faure", handle: "@max.f", color: "#E4C05A" },
-      { userId: user.id, name: "Sarah Koné", handle: "@sarah.k", color: "#FB7185" },
-      { userId: user.id, name: "Antoine Lefèvre", handle: "@antoine.l", color: "#6BA8FF" },
-      { userId: user.id, name: "Maman", handle: "@famille", color: "#C084FC" },
-      { userId: user.id, name: "Hugo Lambert", handle: "@hugo.l", color: "#7BD88F" },
+      { userId, name: "Camille Dupont", handle: "@camille.d", color: "#FF8A5C" },
+      { userId, name: "Thomas Roche", handle: "@thomas.r", color: "#8B7CFF" },
+      { userId, name: "Inès Benali", handle: "@ines.b", color: "#5AD8C2" },
+      { userId, name: "Maxime Faure", handle: "@max.f", color: "#E4C05A" },
+      { userId, name: "Sarah Koné", handle: "@sarah.k", color: "#FB7185" },
+      { userId, name: "Antoine Lefèvre", handle: "@antoine.l", color: "#6BA8FF" },
+      { userId, name: "Maman", handle: "@famille", color: "#C084FC" },
+      { userId, name: "Hugo Lambert", handle: "@hugo.l", color: "#7BD88F" },
     ])
     .returning();
 
@@ -66,22 +62,29 @@ async function seed() {
 
 export async function GET() {
   try {
-    let allUsers = await db.select().from(users).limit(1);
-    if (allUsers.length === 0) {
-      await seed();
-      allUsers = await db.select().from(users).limit(1);
-    }
-    const user = allUsers[0];
+    const session: BankUser | null = await getSessionUser();
+    if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-    const [acc, ctc, tx] = await Promise.all([
-      db.select().from(accounts).orderBy(accounts.createdAt),
-      db.select().from(contacts).orderBy(contacts.createdAt),
-      db.select().from(transactions).orderBy(desc(transactions.createdAt)).limit(80),
+    let acc = await db.select().from(accounts).where(eq(accounts.userId, session.id)).orderBy(accounts.createdAt);
+    if (acc.length === 0) {
+      await seed(session.id);
+      acc = await db.select().from(accounts).where(eq(accounts.userId, session.id)).orderBy(accounts.createdAt);
+    }
+
+    const [ctc, tx] = await Promise.all([
+      db.select().from(contacts).where(eq(contacts.userId, session.id)).orderBy(contacts.createdAt),
+      db
+        .select()
+        .from(transactions)
+        .where(eq(accounts.userId, session.id))
+        .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+        .orderBy(desc(transactions.createdAt))
+        .limit(80),
     ]);
     acc.sort((x, y) => typeRank(x.type) - typeRank(y.type));
 
     const data: BootstrapData = {
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: session.id, name: session.name, email: session.email },
       accounts: acc.map((a) => ({
         id: a.id,
         name: a.name,
@@ -92,14 +95,14 @@ export async function GET() {
       })),
       contacts: ctc.map((c) => ({ id: c.id, name: c.name, handle: c.handle, color: c.color })),
       transactions: tx.map((t) => ({
-        id: t.id,
-        kind: t.kind as BootstrapData["transactions"][number]["kind"],
-        label: t.label,
-        category: t.category,
-        amountCents: t.amountCents,
-        contactId: t.contactId,
-        note: t.note,
-        createdAt: t.createdAt.toISOString(),
+        id: t.transactions.id,
+        kind: t.transactions.kind as BootstrapData["transactions"][number]["kind"],
+        label: t.transactions.label,
+        category: t.transactions.category,
+        amountCents: t.transactions.amountCents,
+        contactId: t.transactions.contactId,
+        note: t.transactions.note,
+        createdAt: t.transactions.createdAt.toISOString(),
       })),
     };
 

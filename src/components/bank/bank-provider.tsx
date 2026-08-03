@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Account, BankUser, BootstrapData, Contact, Transaction } from "@/lib/types";
 
 interface OpResult {
@@ -33,6 +34,7 @@ export function useBank(): BankContextValue {
 }
 
 export function BankProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<BankUser | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -45,9 +47,15 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/bootstrap")
-      .then((r) => r.json())
-      .then((data: BootstrapData) => {
-        if (cancelled) return;
+      .then((r) => {
+        if (r.status === 401) {
+          router.replace("/login");
+          return null;
+        }
+        return r.json();
+      })
+      .then((data: BootstrapData | null) => {
+        if (cancelled || !data) return;
         setUser(data.user);
         setAccounts(data.accounts);
         setContacts(data.contacts);
@@ -63,7 +71,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   const toggleHidden = useCallback(() => {
     setHidden((h) => {

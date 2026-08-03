@@ -152,7 +152,10 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.26 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => router.push("/login")}
+        onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+          router.push("/login");
+        }}
         className="mt-6 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-rose/10 font-display text-sm font-semibold text-rose"
       >
         <LogOut className="h-4 w-4" strokeWidth={2.2} />

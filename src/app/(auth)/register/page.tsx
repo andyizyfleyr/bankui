@@ -23,12 +23,28 @@ export default function RegisterPage() {
 
   const valid = name.trim().length >= 2 && email.includes("@") && password.length >= 6;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!valid || busy) return;
     setBusy(true);
     setError(null);
-    setTimeout(() => router.push("/"), 900);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "Erreur lors de l'inscription");
+        setBusy(false);
+        return;
+      }
+      router.push("/");
+    } catch {
+      setError("Connexion impossible, réessayez");
+      setBusy(false);
+    }
   };
 
   const strength = Math.min(3, Math.floor(password.length / 4) + (/\d/.test(password) ? 1 : 0));

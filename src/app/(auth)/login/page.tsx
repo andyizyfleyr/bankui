@@ -20,14 +20,30 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const valid = email.includes("@") && password.length >= 4;
+  const valid = email.includes("@") && password.length >= 6;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!valid || busy) return;
     setBusy(true);
     setError(null);
-    setTimeout(() => router.push("/"), 900);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "E-mail ou mot de passe incorrect");
+        setBusy(false);
+        return;
+      }
+      router.push("/");
+    } catch {
+      setError("Connexion impossible, réessayez");
+      setBusy(false);
+    }
   };
 
   return (
