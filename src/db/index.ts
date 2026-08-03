@@ -18,6 +18,12 @@ export const pool =
   globalForDb.__arenaNextJsPostgresqlPool ??
   new Pool(databaseUrl ? { connectionString: databaseUrl } : {});
 
+// Neon coupe régulièrement les connexions idle : sans listener, l'événement
+// 'error' du pool est considéré comme non géré et fait planter la fonction.
+pool.on("error", (err) => {
+  console.error("pg pool error", err);
+});
+
 if (process.env.NODE_ENV !== "production") {
   globalForDb.__arenaNextJsPostgresqlPool = pool;
 }
