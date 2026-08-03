@@ -45,3 +45,19 @@ export const transactions = pgTable("transactions", {
   note: text("note"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const loans = pgTable("loans", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  accountId: uuid("account_id").references(() => accounts.id),
+  label: text("label").notNull().default("Prêt personnel"),
+  amountCents: integer("amount_cents").notNull(),
+  remainingCents: integer("remaining_cents").notNull(),
+  ratePercent: integer("rate_percent").notNull().default(5),
+  termMonths: integer("term_months").notNull().default(12),
+  monthlyPaymentCents: integer("monthly_payment_cents").notNull(),
+  status: text("status").notNull().default("active"), // active | repaid
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

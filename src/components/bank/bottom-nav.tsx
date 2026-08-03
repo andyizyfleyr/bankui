@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeftRight, House, ReceiptText, Send, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, House, Landmark, ReceiptText, Send, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/format";
 import { useBank } from "./bank-provider";
 
@@ -16,6 +16,7 @@ interface Tab {
 const leftTabs: Tab[] = [
   { href: "/", label: "Accueil", icon: House },
   { href: "/send", label: "Envoyer", icon: Send },
+  { href: "/pret", label: "Prêt", icon: Landmark },
 ];
 
 const rightTabs: Tab[] = [

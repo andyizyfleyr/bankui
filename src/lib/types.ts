@@ -33,9 +33,22 @@ export interface Transaction {
   createdAt: string;
 }
 
+export interface Loan {
+  id: string;
+  label: string;
+  amountCents: number;
+  remainingCents: number;
+  ratePercent: number;
+  termMonths: number;
+  monthlyPaymentCents: number;
+  status: "active" | "repaid";
+  createdAt: string;
+}
+
 export interface BootstrapData {
   user: BankUser;
   accounts: Account[];
   contacts: Contact[];
   transactions: Transaction[];
+  loans: Loan[];
 }

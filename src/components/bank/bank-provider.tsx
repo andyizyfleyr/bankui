@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Account, BankUser, BootstrapData, Contact, Transaction } from "@/lib/types";
+import type { Account, BankUser, BootstrapData, Contact, Loan, Transaction } from "@/lib/types";
 
 interface OpResult {
   ok: boolean;
@@ -15,6 +15,7 @@ interface BankContextValue {
   accounts: Account[];
   contacts: Contact[];
   transactions: Transaction[];
+  loans: Loan[];
   primary: Account | null;
   hidden: boolean;
   toggleHidden: () => void;
@@ -23,6 +24,8 @@ interface BankContextValue {
   closeTransfer: () => void;
   sendMoney: (contactId: string, amountCents: number, note?: string) => Promise<OpResult>;
   makeTransfer: (fromId: string, toId: string, amountCents: number) => Promise<OpResult>;
+  addAccount: (name: string, type: Account["type"], balanceCents: number) => Promise<OpResult>;
+  requestLoan: (amountCents: number, termMonths: number, accountId?: string) => Promise<OpResult>;
 }
 
 const BankContext = createContext<BankContextValue | null>(null);
@@ -40,6 +43,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [hidden, setHidden] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const snapshot = useRef<{ accounts: Account[]; transactions: Transaction[] } | null>(null);
@@ -60,6 +64,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         setAccounts(data.accounts);
         setContacts(data.contacts);
         setTransactions(data.transactions);
+        setLoans(data.loans ?? []);
         try {
           if (localStorage.getItem(`nova:hidden:${data.user.id}`) === "1") setHidden(true);
         } catch {}
@@ -93,10 +98,43 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       }
       return { ok: false, error: typeof data.error === "string" ? data.error : "Erreur réseau" };
     }
-    setAccounts(data.accounts);
-    setTransactions(data.transactions);
+    if (Array.isArray(data.accounts)) setAccounts(data.accounts);
+    if (Array.isArray(data.transactions)) setTransactions(data.transactions);
+    if (Array.isArray(data.loans)) setLoans(data.loans);
     return { ok: true };
   }, []);
+
+  const addAccount = useCallback(
+    async (name: string, type: Account["type"], balanceCents: number): Promise<OpResult> => {
+      try {
+        const res = await fetch("/api/accounts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, type, balanceCents }),
+        });
+        return await reconcile(res);
+      } catch {
+        return { ok: false, error: "Connexion impossible" };
+      }
+    },
+    [reconcile]
+  );
+
+  const requestLoan = useCallback(
+    async (amountCents: number, termMonths: number, accountId?: string): Promise<OpResult> => {
+      try {
+        const res = await fetch("/api/loans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amountCents, termMonths, accountId }),
+        });
+        return await reconcile(res);
+      } catch {
+        return { ok: false, error: "Connexion impossible" };
+      }
+    },
+    [reconcile]
+  );
 
   const sendMoney = useCallback(
     async (contactId: string, amountCents: number, note?: string): Promise<OpResult> => {
@@ -188,6 +226,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       accounts,
       contacts,
       transactions,
+      loans,
       primary: accounts.find((a) => a.type === "courant") ?? accounts[0] ?? null,
       hidden,
       toggleHidden,
@@ -196,8 +235,10 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       closeTransfer: () => setTransferOpen(false),
       sendMoney,
       makeTransfer,
+      addAccount,
+      requestLoan,
     }),
-    [ready, user, accounts, contacts, transactions, hidden, toggleHidden, transferOpen, sendMoney, makeTransfer]
+    [ready, user, accounts, contacts, transactions, loans, hidden, toggleHidden, transferOpen, sendMoney, makeTransfer, addAccount, requestLoan]
   );
 
   return <BankContext.Provider value={value}>{children}</BankContext.Provider>;

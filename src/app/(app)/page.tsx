@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   PiggyBank,
+  Plus,
   Send,
   TrendingUp,
   type LucideIcon,
@@ -18,6 +19,7 @@ import {
 import type { Account } from "@/lib/types";
 import { cn, firstName, formatEUR } from "@/lib/format";
 import { useBank } from "@/components/bank/bank-provider";
+import { AddAccountSheet } from "@/components/bank/add-account-sheet";
 import { AnimatedMoney, MoneyText } from "@/components/bank/amount";
 import { ContactAvatar } from "@/components/bank/avatar";
 import { TransactionItem } from "@/components/bank/transaction-item";
@@ -35,6 +37,7 @@ const fadeUp = {
 export default function HomePage() {
   const router = useRouter();
   const { user, accounts, transactions, hidden, toggleHidden, openTransfer } = useBank();
+  const [addOpen, setAddOpen] = useState(false);
 
   const total = accounts.reduce((sum, a) => sum + a.balanceCents, 0);
   const hour = new Date().getHours();
@@ -193,13 +196,24 @@ export default function HomePage() {
       <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.24 }} className="mt-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-base font-semibold text-ink">Mes comptes</h2>
-          <span className="text-xs font-medium text-mut">{accounts.length} comptes</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-mut">{accounts.length} comptes</span>
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => setAddOpen(true)}
+              aria-label="Ajouter un compte"
+              className="grid h-7 w-7 place-items-center rounded-full bg-ink text-white shadow-[0_8px_16px_-6px_rgba(11,15,20,0.4)]"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} />
+            </motion.button>
+          </div>
         </div>
         <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
           {accounts.map((account) => (
             <AccountCard key={account.id} account={account} hidden={hidden} />
           ))}
         </div>
+        <AddAccountSheet open={addOpen} onClose={() => setAddOpen(false)} />
       </motion.div>
 
       {/* Transactions récentes */}
