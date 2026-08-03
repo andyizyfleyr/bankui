@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/bank/app-shell";
 
 const space = Space_Grotesk({
   subsets: ["latin"],
@@ -33,9 +32,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr" className={`${space.variable} ${inter.variable}`}>
-      <body className="tap-none">
-        <AppShell>{children}</AppShell>
-      </body>
+      <body className="tap-none">{children}</body>
     </html>
   );
 }
