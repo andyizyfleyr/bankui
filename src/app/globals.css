@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Thème clair Nova V2 */
+  --color-paper: #f1f3f6;
+  --color-card: #ffffff;
+  --color-ink: #0b0f14;
+  --color-mut: #667085;
+  --color-faint: #98a2b3;
+  --color-line: #e7eaf0;
+  --color-lime: #d9f555;
+  --color-mint: #0d9f6e;
+  --color-rose: #e14a63;
+  --color-violet: #7c6cf0;
+  --color-peach: #e8793f;
+  --color-sky: #2b7de0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+::selection {
+  background: var(--color-lime);
+  color: var(--color-ink);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tap-none {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ombre douce signature des cartes claires */
+.card-shadow {
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05),
+    0 16px 36px -18px rgba(16, 24, 40, 0.14);
+}
+
+/* Grain subtil sur le cadre */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 14px);
+}
+
+/* Fond d'ambiance clair du bureau (hors cadre) */
+.ambient {
+  background:
+    radial-gradient(55% 45% at 12% 8%, rgba(217, 245, 85, 0.35), transparent 62%),
+    radial-gradient(48% 40% at 88% 18%, rgba(124, 108, 240, 0.16), transparent 62%),
+    radial-gradient(42% 42% at 50% 96%, rgba(13, 159, 110, 0.14), transparent 62%),
+    #e9ecf0;
+}
+
+input,
+button {
+  font: inherit;
+}
