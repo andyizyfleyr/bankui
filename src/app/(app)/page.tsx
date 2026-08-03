@@ -10,10 +10,12 @@ import {
   Bell,
   Eye,
   EyeOff,
-  PiggyBank,
+  Landmark,
   Plus,
   Send,
+  TrendingDown,
   TrendingUp,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import type { Account } from "@/lib/types";
@@ -63,11 +65,37 @@ export default function HomePage() {
   const weekTotal = week.reduce((s, d) => s + d.value, 0);
   const weekMax = Math.max(...week.map((d) => d.value), 1);
 
+  /* Tendance des dépenses : ce mois vs mois précédent, sur les vraies données */
+  const trend = useMemo(() => {
+    const now = new Date();
+    const curStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const spent = (from: Date, to: Date) =>
+      transactions
+        .filter((t) => {
+          if (t.amountCents >= 0) return false;
+          const d = new Date(t.createdAt);
+          return d >= from && d < to;
+        })
+        .reduce((s, t) => s + Math.abs(t.amountCents), 0);
+    const cur = spent(curStart, new Date(now.getFullYear(), now.getMonth() + 1, 1));
+    const prev = spent(prevStart, curStart);
+    if (prev <= 0) return null;
+    const delta = ((cur - prev) / prev) * 100;
+    return { delta: Math.abs(delta), up: delta > 0, flat: Math.abs(delta) < 0.5 };
+  }, [transactions]);
+
+  /* Activité récente (aujourd'hui) pour la pastille de notification */
+  const hasNews = useMemo(() => {
+    const today = new Date().toDateString();
+    return transactions.some((t) => new Date(t.createdAt).toDateString() === today);
+  }, [transactions]);
+
   const actions: { label: string; icon: LucideIcon; onClick: () => void }[] = [
     { label: "Envoyer", icon: Send, onClick: () => router.push("/send") },
     { label: "Transfert", icon: ArrowLeftRight, onClick: openTransfer },
-    { label: "Épargner", icon: PiggyBank, onClick: openTransfer },
-    { label: "Analyse", icon: TrendingUp, onClick: () => router.push("/activity") },
+    { label: "Prêt", icon: Landmark, onClick: () => router.push("/pret") },
+    { label: "Retrait", icon: Wallet, onClick: () => router.push("/retrait") },
   ];
 
   return (
@@ -85,11 +113,12 @@ export default function HomePage() {
         </div>
         <motion.button
           whileTap={{ scale: 0.88 }}
-          aria-label="Notifications"
+          onClick={() => router.push("/activity")}
+          aria-label="Activité récente"
           className="card-shadow relative grid h-11 w-11 place-items-center rounded-2xl bg-white text-ink"
         >
           <Bell className="h-5 w-5" strokeWidth={1.9} />
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose ring-2 ring-white" />
+          {hasNews && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose ring-2 ring-white" />}
         </motion.button>
       </motion.div>
 
@@ -121,10 +150,26 @@ export default function HomePage() {
         />
 
         <div className="relative mt-4 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/10 px-2.5 py-1 text-[11px] font-bold text-mint">
-            <TrendingUp className="h-3.5 w-3.5" />
-            +2,4 % ce mois
-          </span>
+          {trend ? (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold",
+                trend.up ? "bg-rose/10 text-rose" : "bg-mint/10 text-mint"
+              )}
+            >
+              {trend.up ? (
+                <TrendingUp className="h-3.5 w-3.5" />
+              ) : (
+                <TrendingDown className="h-3.5 w-3.5" />
+              )}
+              {trend.flat ? "Stable ce mois" : `${trend.delta.toFixed(1).replace(".", ",")} % ce mois`}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-2.5 py-1 text-[11px] font-bold text-mut">
+              <TrendingUp className="h-3.5 w-3.5" />
+              Premiers relevés
+            </span>
+          )}
           <svg width="92" height="30" viewBox="0 0 96 32" fill="none" aria-hidden>
             <defs>
               <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
@@ -246,7 +291,7 @@ function AccountCard({ account, hidden }: { account: Account; hidden: boolean })
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
-      className="card-shadow relative w-[236px] shrink-0 snap-start overflow-hidden rounded-[24px] bg-white p-4"
+      className="card-shadow relative w-[236px] shrink-0 snap-center overflow-hidden rounded-[24px] bg-white p-4"
     >
       <div
         className="pointer-events-none absolute -right-9 -top-9 h-24 w-24 rounded-full blur-2xl"

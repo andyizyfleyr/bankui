@@ -89,7 +89,7 @@ export default function SendPage() {
   };
 
   return (
-    <div className="flex h-full min-h-full flex-col px-5 pb-5 pt-4">
+    <div className="flex h-full min-h-full flex-col px-5 pb-6 pt-4">
       {/* En-tête */}
       <div className="flex flex-none items-center gap-3">
         <Link
@@ -264,6 +264,7 @@ function SendOverlay(p: OverlayProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        exit={{ opacity: 0, transition: { duration: 0.25 } }}
         className="relative flex h-full flex-col items-center justify-center overflow-hidden bg-paper px-8 text-center"
       >
         {/* Confettis */}
@@ -313,7 +314,7 @@ function SendOverlay(p: OverlayProps) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative flex h-full flex-col justify-end">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative flex h-full flex-col justify-end">
       <div
         className="absolute inset-0 bg-ink/45 backdrop-blur-[3px]"
         onClick={p.stage !== "busy" ? p.onCancel : undefined}
@@ -321,6 +322,7 @@ function SendOverlay(p: OverlayProps) {
       <motion.div
         initial={{ y: "45%" }}
         animate={{ y: 0 }}
+        exit={{ y: "45%" }}
         transition={{ type: "spring", stiffness: 340, damping: 33 }}
         className="relative rounded-t-[32px] bg-white px-5 pb-8 pt-2.5 shadow-[0_-24px_60px_-24px_rgba(16,24,40,0.35)]"
       >

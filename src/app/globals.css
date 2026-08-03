@@ -84,3 +84,14 @@ input,
 button {
   font: inherit;
 }
+
+/* Mobile : pas de délai de double-tap / zoom accidentel sur les éléments interactifs */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}

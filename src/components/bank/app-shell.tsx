@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { BankProvider, useBank } from "./bank-provider";
 import { BottomNav } from "./bottom-nav";
@@ -18,13 +19,24 @@ function ShellInner({ children }: { children: ReactNode }) {
   const { ready } = useBank();
   const [overlay, setOverlayState] = useState<ReactNode | null>(null);
   const setOverlay = useCallback((node: ReactNode | null) => setOverlayState(node), []);
+  const pathname = usePathname();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Au changement de page, on repart du haut (sinon le scroll persiste entre onglets)
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [pathname]);
 
   return (
     <OverlayContext.Provider value={setOverlay}>
-      <div className="no-scrollbar relative min-h-0 flex-1 overflow-y-auto">{children}</div>
+      <div ref={scrollRef} className="no-scrollbar relative min-h-0 flex-1 overflow-y-auto">
+        {children}
+      </div>
       <BottomNav />
       <TransferSheet />
-      {overlay ? <div className="absolute inset-0 z-[65]">{overlay}</div> : null}
+      <AnimatePresence>
+        {overlay ? <div className="absolute inset-0 z-[65]">{overlay}</div> : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {!ready && (
@@ -63,7 +75,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <PhoneFrame>
       <BankProvider>
-        <ShellInner>{children}</ShellInner>
+        <MotionConfig reducedMotion="user">
+          <ShellInner>{children}</ShellInner>
+        </MotionConfig>
       </BankProvider>
     </PhoneFrame>
   );
