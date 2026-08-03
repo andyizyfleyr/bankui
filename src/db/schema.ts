@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -26,8 +26,12 @@ export const contacts = pgTable("contacts", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
+  contactUserId: uuid("contact_user_id")
+    .notNull()
+    .references(() => users.id),
+  favorite: boolean("favorite").notNull().default(false),
   name: text("name").notNull(),
-  handle: text("handle").notNull(),
+  email: text("email").notNull(),
   color: text("color").notNull().default("#8B7CFF"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

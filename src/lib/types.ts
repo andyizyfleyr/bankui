@@ -4,6 +4,15 @@ export interface BankUser {
   email: string;
 }
 
+export interface Contact {
+  id: string;
+  contactUserId: string;
+  name: string;
+  email: string;
+  color: string;
+  favorite: boolean;
+}
+
 export interface SearchUser {
   id: string;
   name: string;
@@ -49,6 +58,7 @@ export interface Loan {
 export interface BootstrapData {
   user: BankUser;
   accounts: Account[];
+  contacts: Contact[];
   transactions: Transaction[];
   loans: Loan[];
 }

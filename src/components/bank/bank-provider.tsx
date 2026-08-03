@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Account, BankUser, BootstrapData, Loan, SearchUser, Transaction } from "@/lib/types";
+import type { Account, BankUser, BootstrapData, Contact, Loan, SearchUser, Transaction } from "@/lib/types";
 import type { WithdrawProvider } from "@/lib/withdraw";
 
 interface OpResult {
@@ -28,6 +28,10 @@ interface BankContextValue {
   addAccount: (name: string, type: Account["type"], balanceCents: number) => Promise<OpResult>;
   requestLoan: (amountCents: number, termMonths: number, accountId?: string) => Promise<OpResult>;
   withdraw: (provider: WithdrawProvider, identifier: string, amountCents: number) => Promise<OpResult>;
+  contacts: Contact[];
+  addContact: (email: string, favorite: boolean) => Promise<OpResult>;
+  setContactFavorite: (id: string, favorite: boolean) => Promise<OpResult>;
+  removeContact: (id: string) => Promise<OpResult>;
 }
 
 const BankContext = createContext<BankContextValue | null>(null);
@@ -45,6 +49,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [hidden, setHidden] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const snapshot = useRef<{ accounts: Account[]; transactions: Transaction[] } | null>(null);
@@ -65,6 +70,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         setAccounts(data.accounts);
         setTransactions(data.transactions);
         setLoans(data.loans ?? []);
+        setContacts(data.contacts ?? []);
         try {
           if (localStorage.getItem(`nova:hidden:${data.user.id}`) === "1") setHidden(true);
         } catch {}
@@ -161,6 +167,62 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       return Array.isArray(data.users) ? data.users : [];
     } catch {
       return [];
+    }
+  }, []);
+
+  const addContact = useCallback(async (email: string, favorite: boolean): Promise<OpResult> => {
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, favorite }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { ok: false, error: typeof data.error === "string" ? data.error : "Erreur réseau" };
+      }
+      if (data.contact) setContacts((prev) => [data.contact, ...prev]);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Connexion impossible" };
+    }
+  }, []);
+
+  const setContactFavorite = useCallback(async (id: string, favorite: boolean): Promise<OpResult> => {
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, favorite }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { ok: false, error: typeof data.error === "string" ? data.error : "Erreur réseau" };
+      }
+      if (data.contact) {
+        setContacts((prev) => prev.map((c) => (c.id === data.contact.id ? { ...c, favorite: data.contact.favorite } : c)));
+      }
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Connexion impossible" };
+    }
+  }, []);
+
+  const removeContact = useCallback(async (id: string): Promise<OpResult> => {
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { ok: false, error: typeof data.error === "string" ? data.error : "Erreur réseau" };
+      }
+      setContacts((prev) => prev.filter((c) => c.id !== id));
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Connexion impossible" };
     }
   }, []);
 
@@ -265,8 +327,12 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       addAccount,
       requestLoan,
       withdraw,
+      contacts,
+      addContact,
+      setContactFavorite,
+      removeContact,
     }),
-    [ready, user, accounts, transactions, loans, hidden, toggleHidden, transferOpen, searchUsers, sendMoney, makeTransfer, addAccount, requestLoan, withdraw]
+    [ready, user, accounts, transactions, loans, hidden, toggleHidden, transferOpen, searchUsers, sendMoney, makeTransfer, addAccount, requestLoan, withdraw, contacts, addContact, setContactFavorite, removeContact]
   );
 
   return <BankContext.Provider value={value}>{children}</BankContext.Provider>;

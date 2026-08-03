@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronLeft, Loader2, Mail, Search, UserRound, Zap } from "lucide-react";
+import { Check, ChevronLeft, Loader2, Mail, Search, Star, UserRound, Zap } from "lucide-react";
 import type { SearchUser } from "@/lib/types";
-import { cn, digitsToCents, firstName, formatEUR, formatEURShort } from "@/lib/format";
+import { cn, digitsToCents, firstName, formatEUR, formatEURShort, initials } from "@/lib/format";
 import { useBank } from "@/components/bank/bank-provider";
 import { useOverlay } from "@/components/bank/app-shell";
 import { AmountKeypad } from "@/components/bank/amount-keypad";
@@ -24,8 +24,10 @@ const QUICK = [
 
 export default function SendPage() {
   const router = useRouter();
-  const { user, primary, hidden, searchUsers, sendMoney } = useBank();
+  const { user, primary, hidden, searchUsers, sendMoney, contacts, addContact, setContactFavorite } = useBank();
   const setOverlay = useOverlay();
+
+  const favorites = contacts.filter((c) => c.favorite);
 
   const [digits, setDigits] = useState("");
   const [recipient, setRecipient] = useState<SearchUser | null>(null);
@@ -145,9 +147,38 @@ export default function SendPage() {
 
           <div className="no-scrollbar mt-3 min-h-0 flex-1 overflow-y-auto">
             {query.trim().length < 2 ? (
-              <p className="py-10 text-center text-sm text-mut">
-                Cherchez un utilisateur par son nom ou son email.
-              </p>
+              favorites.length > 0 ? (
+                <div>
+                  <p className="px-2 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-mut">Favoris</p>
+                  <ul>
+                    {favorites.map((c) => (
+                      <li key={c.id}>
+                        <button
+                          onClick={() => {
+                            setRecipient({ id: c.contactUserId, name: c.name, email: c.email, initials: initials(c.name), color: c.color });
+                            setQuery("");
+                          }}
+                          className="flex w-full items-center gap-3 rounded-2xl px-2 py-2.5 text-left transition-colors active:bg-ink/[0.04]"
+                        >
+                          <ContactAvatar name={c.name} color={c.color} size={44} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-ink">{c.name}</span>
+                            <span className="flex items-center gap-1 text-xs text-mut">
+                              <Mail className="h-3 w-3" />
+                              {c.email}
+                            </span>
+                          </span>
+                          <Star className="h-4 w-4 flex-none fill-ink text-ink" strokeWidth={2} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="py-10 text-center text-sm text-mut">
+                  Cherchez un utilisateur par son nom ou son email.
+                </p>
+              )
             ) : searching ? (
               <p className="py-10 text-center text-sm text-mut">
                 <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
@@ -157,29 +188,55 @@ export default function SendPage() {
               <p className="py-10 text-center text-sm text-mut">Aucun utilisateur trouvé</p>
             ) : (
               <ul>
-                {results.map((u) => (
-                  <li key={u.id}>
-                    <button
-                      onClick={() => {
-                        setRecipient(u);
-                        setQuery("");
-                      }}
-                      className="flex w-full items-center gap-3 rounded-2xl px-2 py-2.5 text-left transition-colors active:bg-ink/[0.04]"
-                    >
-                      <ContactAvatar name={u.name} color={u.color} size={44} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-ink">{u.name}</span>
-                        <span className="flex items-center gap-1 text-xs text-mut">
-                          <Mail className="h-3 w-3" />
-                          {u.email}
-                        </span>
-                      </span>
-                      <span className="grid h-6 w-6 flex-none place-items-center rounded-full border border-line bg-white text-transparent">
-                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                {results.map((u) => {
+                  const contact = contacts.find((c) => c.contactUserId === u.id);
+                  const favorite = contact?.favorite ?? false;
+                  return (
+                    <li key={u.id}>
+                      <div className="flex w-full items-center gap-1 rounded-2xl px-2 py-2.5 text-left transition-colors active:bg-ink/[0.04]">
+                        <button
+                          onClick={() => {
+                            setRecipient(u);
+                            setQuery("");
+                          }}
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        >
+                          <ContactAvatar name={u.name} color={u.color} size={44} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-ink">{u.name}</span>
+                            <span className="flex items-center gap-1 text-xs text-mut">
+                              <Mail className="h-3 w-3" />
+                              {u.email}
+                            </span>
+                          </span>
+                        </button>
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          aria-label={contact ? (favorite ? "Retirer des favoris" : "Ajouter aux favoris") : "Ajouter comme favori"}
+                          onClick={async () => {
+                            if (contact) {
+                              await setContactFavorite(contact.id, !favorite);
+                            } else {
+                              await addContact(u.email, true);
+                            }
+                            try {
+                              navigator.vibrate?.(8);
+                            } catch {}
+                          }}
+                          className={cn(
+                            "grid h-8 w-8 flex-none place-items-center rounded-full border transition-colors",
+                            contact ? "border-ink/10 bg-ink/[0.04]" : "border-line bg-white text-faint"
+                          )}
+                        >
+                          <Star
+                            className={cn("h-4 w-4", contact && "fill-ink text-ink")}
+                            strokeWidth={2}
+                          />
+                        </motion.button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
