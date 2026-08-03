@@ -3,7 +3,7 @@ import { verifyToken } from "@/lib/jwt";
 
 const COOKIE_NAME = "nova_session";
 
-const PROTECTED = ["/", "/send", "/pret", "/activity", "/settings"];
+const PROTECTED = ["/", "/send", "/pret", "/retrait", "/activity", "/settings"];
 const AUTH_PAGES = ["/login", "/register"];
 
 function isPath(pathname: string, base: string): boolean {
@@ -33,5 +33,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/send/:path*", "/pret/:path*", "/activity/:path*", "/settings/:path*", "/login", "/register"],
+  matcher: ["/", "/send/:path*", "/pret/:path*", "/retrait/:path*", "/activity/:path*", "/settings/:path*", "/login", "/register"],
 };

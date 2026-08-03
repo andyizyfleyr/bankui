@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeftRight, House, Landmark, ReceiptText, Send, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, House, Landmark, ReceiptText, Send, SlidersHorizontal, Wallet, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/format";
 import { useBank } from "./bank-provider";
 
@@ -20,6 +20,7 @@ const leftTabs: Tab[] = [
 ];
 
 const rightTabs: Tab[] = [
+  { href: "/retrait", label: "Retrait", icon: Wallet },
   { href: "/activity", label: "Activité", icon: ReceiptText },
   { href: "/settings", label: "Réglages", icon: SlidersHorizontal },
 ];

@@ -20,7 +20,7 @@ export interface Contact {
   color: string;
 }
 
-export type TxKind = "send" | "receive" | "transfer" | "payment";
+export type TxKind = "send" | "receive" | "transfer" | "payment" | "withdraw";
 
 export interface Transaction {
   id: string;

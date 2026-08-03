@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Account, BankUser, BootstrapData, Contact, Loan, Transaction } from "@/lib/types";
+import type { WithdrawProvider } from "@/lib/withdraw";
 
 interface OpResult {
   ok: boolean;
@@ -26,6 +27,7 @@ interface BankContextValue {
   makeTransfer: (fromId: string, toId: string, amountCents: number) => Promise<OpResult>;
   addAccount: (name: string, type: Account["type"], balanceCents: number) => Promise<OpResult>;
   requestLoan: (amountCents: number, termMonths: number, accountId?: string) => Promise<OpResult>;
+  withdraw: (provider: WithdrawProvider, identifier: string, amountCents: number) => Promise<OpResult>;
 }
 
 const BankContext = createContext<BankContextValue | null>(null);
@@ -136,6 +138,22 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
     [reconcile]
   );
 
+  const withdraw = useCallback(
+    async (provider: WithdrawProvider, identifier: string, amountCents: number): Promise<OpResult> => {
+      try {
+        const res = await fetch("/api/withdraw", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider, identifier, amountCents }),
+        });
+        return await reconcile(res);
+      } catch {
+        return { ok: false, error: "Connexion impossible" };
+      }
+    },
+    [reconcile]
+  );
+
   const sendMoney = useCallback(
     async (contactId: string, amountCents: number, note?: string): Promise<OpResult> => {
       const from = accounts.find((a) => a.type === "courant");
@@ -237,8 +255,9 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       makeTransfer,
       addAccount,
       requestLoan,
+      withdraw,
     }),
-    [ready, user, accounts, contacts, transactions, loans, hidden, toggleHidden, transferOpen, sendMoney, makeTransfer, addAccount, requestLoan]
+    [ready, user, accounts, contacts, transactions, loans, hidden, toggleHidden, transferOpen, sendMoney, makeTransfer, addAccount, requestLoan, withdraw]
   );
 
   return <BankContext.Provider value={value}>{children}</BankContext.Provider>;
