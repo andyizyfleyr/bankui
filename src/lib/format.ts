@@ -46,11 +46,11 @@ export function timeLabel(iso: string): string {
   return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Convertit une chaîne de chiffres (centimes) en nombre de centimes borné. */
+/** Convertit une chaîne de chiffres (euros entiers) en nombre de centimes borné. */
 export function digitsToCents(digits: string): number {
   const n = parseInt(digits || "0", 10);
   if (Number.isNaN(n)) return 0;
-  return Math.min(n, 999_999_999);
+  return Math.min(n, 9_999_999) * 100;
 }
 
 export function cn(...parts: Array<string | false | null | undefined>): string {

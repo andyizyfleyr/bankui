@@ -31,7 +31,7 @@ export default function LoanPage() {
   const { loans, accounts, requestLoan, hidden } = useBank();
   const setOverlay = useOverlay();
 
-  const [digits, setDigits] = useState("50000");
+  const [digits, setDigits] = useState("500");
   const [term, setTerm] = useState(24);
   const [stage, setStage] = useState<Stage>("compose");
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export default function LoanPage() {
           }
         }}
         onNew={() => {
-          setDigits("50000");
+          setDigits("500");
           setTerm(24);
           setStage("compose");
         }}
@@ -119,7 +119,7 @@ export default function LoanPage() {
             <motion.button
               key={a}
               whileTap={{ scale: 0.92 }}
-              onClick={() => setDigits(String(a))}
+              onClick={() => setDigits(String(Math.round(a / 100)))}
               className={cn(
                 "shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
                 amount === a ? "border-transparent bg-ink text-white" : "border-line bg-white text-ink hover:bg-ink/[0.05]"
@@ -130,7 +130,7 @@ export default function LoanPage() {
           ))}
           <motion.button
             whileTap={{ scale: 0.92 }}
-            onClick={() => setDigits(String(MAX_LOAN_CENTS))}
+            onClick={() => setDigits(String(Math.round(MAX_LOAN_CENTS / 100)))}
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
               amount === MAX_LOAN_CENTS ? "border-transparent bg-ink text-white" : "bg-ink/[0.06] text-ink"

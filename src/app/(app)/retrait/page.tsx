@@ -194,7 +194,7 @@ export default function WithdrawPage() {
             <motion.button
               key={a}
               whileTap={{ scale: 0.92 }}
-              onClick={() => setDigits(String(a))}
+              onClick={() => setDigits(String(Math.round(a / 100)))}
               className={cn(
                 "shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
                 amount === a ? "border-transparent bg-ink text-white" : "border-line bg-white text-ink hover:bg-ink/[0.05]"
@@ -205,7 +205,7 @@ export default function WithdrawPage() {
           ))}
           <motion.button
             whileTap={{ scale: 0.92 }}
-            onClick={() => setDigits(String(maxCents))}
+            onClick={() => setDigits(String(Math.floor(maxCents / 100)))}
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
               amount === maxCents ? "border-transparent bg-ink text-white" : "bg-ink/[0.06] text-ink"

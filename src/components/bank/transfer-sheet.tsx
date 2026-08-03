@@ -63,7 +63,7 @@ export function TransferSheet() {
 
   const applyPreset = (ratio: number) => {
     if (!from) return;
-    const value = Math.floor(from.balanceCents * ratio);
+    const value = Math.floor((from.balanceCents * ratio) / 100);
     setDigits(value > 0 ? String(value) : "");
   };
 

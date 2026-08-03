@@ -106,7 +106,7 @@ export default function SendPage() {
   }, [stage, cents, recipient, note, error, hidden]);
 
   const quickAdd = (add: number) => {
-    setDigits((d) => String(digitsToCents(d) + add));
+    setDigits((d) => String(Math.floor((digitsToCents(d) + add) / 100)));
   };
 
   return (
@@ -288,7 +288,7 @@ export default function SendPage() {
               ))}
               <motion.button
                 whileTap={{ scale: 0.92 }}
-                onClick={() => setDigits(String(primary?.balanceCents ?? 0))}
+                onClick={() => setDigits(String(Math.floor((primary?.balanceCents ?? 0) / 100)))}
                 className="shrink-0 rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-white"
               >
                 Max
