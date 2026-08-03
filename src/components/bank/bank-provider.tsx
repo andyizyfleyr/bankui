@@ -60,14 +60,14 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         setAccounts(data.accounts);
         setContacts(data.contacts);
         setTransactions(data.transactions);
+        try {
+          if (localStorage.getItem(`nova:hidden:${data.user.id}`) === "1") setHidden(true);
+        } catch {}
       })
       .catch(() => {})
       .finally(() => {
         if (!cancelled) setReady(true);
       });
-    try {
-      if (localStorage.getItem("nova:hidden") === "1") setHidden(true);
-    } catch {}
     return () => {
       cancelled = true;
     };
@@ -75,12 +75,14 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
 
   const toggleHidden = useCallback(() => {
     setHidden((h) => {
-      try {
-        localStorage.setItem("nova:hidden", h ? "0" : "1");
-      } catch {}
+      if (user) {
+        try {
+          localStorage.setItem(`nova:hidden:${user.id}`, h ? "0" : "1");
+        } catch {}
+      }
       return !h;
     });
-  }, []);
+  }, [user]);
 
   const reconcile = useCallback(async (res: Response): Promise<OpResult> => {
     const data = await res.json().catch(() => ({}));

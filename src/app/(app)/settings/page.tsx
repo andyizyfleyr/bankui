@@ -41,18 +41,21 @@ export default function SettingsPage() {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
 
   useEffect(() => {
+    if (!user) return;
     try {
-      const raw = localStorage.getItem("nova:prefs");
+      const raw = localStorage.getItem(`nova:prefs:${user.id}`);
       if (raw) setPrefs({ ...DEFAULT_PREFS, ...JSON.parse(raw) });
     } catch {}
-  }, []);
+  }, [user?.id]);
 
   const update = (key: keyof Prefs, value: boolean) => {
     setPrefs((p) => {
       const next = { ...p, [key]: value };
-      try {
-        localStorage.setItem("nova:prefs", JSON.stringify(next));
-      } catch {}
+      if (user) {
+        try {
+          localStorage.setItem(`nova:prefs:${user.id}`, JSON.stringify(next));
+        } catch {}
+      }
       return next;
     });
   };
