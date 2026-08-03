@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { users, accounts, contacts, transactions, loans } from "@/db/schema";
+import { users, accounts, transactions, loans } from "@/db/schema";
 import type { BankUser, BootstrapData } from "@/lib/types";
 import { getSessionUser } from "@/lib/auth";
 
@@ -39,26 +39,11 @@ async function seed(userId: string, displayName: string) {
     ])
     .returning();
 
-  const people = await db
-    .insert(contacts)
-    .values([
-      { userId, name: "Camille Dupont", handle: "@camille.d", color: "#FF8A5C" },
-      { userId, name: "Thomas Roche", handle: "@thomas.r", color: "#8B7CFF" },
-      { userId, name: "Inès Benali", handle: "@ines.b", color: "#5AD8C2" },
-      { userId, name: "Maxime Faure", handle: "@max.f", color: "#E4C05A" },
-      { userId, name: "Sarah Koné", handle: "@sarah.k", color: "#FB7185" },
-      { userId, name: "Antoine Lefèvre", handle: "@antoine.l", color: "#6BA8FF" },
-      { userId, name: "Maman", handle: "@famille", color: "#C084FC" },
-      { userId, name: "Hugo Lambert", handle: "@hugo.l", color: "#7BD88F" },
-    ])
-    .returning();
-
   const now = Date.now();
-  const [camille, thomas] = people;
 
   await db.insert(transactions).values([
     { accountId: courant.id, kind: "payment", label: "Boulangerie Paul", category: "Alimentation", amountCents: scale(-480), createdAt: new Date(now - 2 * HOUR) },
-    { accountId: courant.id, contactId: thomas.id, kind: "receive", label: "Thomas Roche", category: "Remboursement", amountCents: scale(2500), note: "Resto d'hier", createdAt: new Date(now - 9 * HOUR) },
+    { accountId: courant.id, kind: "receive", label: "Remboursement de Thomas", category: "Remboursement", amountCents: scale(2500), note: "Resto d'hier", createdAt: new Date(now - 9 * HOUR) },
     { accountId: courant.id, kind: "payment", label: "Netflix", category: "Abonnements", amountCents: scale(-1349), createdAt: new Date(now - 1 * DAY) },
     { accountId: courant.id, kind: "payment", label: "SNCF Connect", category: "Transport", amountCents: scale(-3210), createdAt: new Date(now - 1 * DAY - 5 * HOUR) },
     { accountId: courant.id, kind: "receive", label: `Salaire — ${first}`, category: "Salaire", amountCents: scale(385000), createdAt: new Date(now - 2 * DAY) },
@@ -66,7 +51,7 @@ async function seed(userId: string, displayName: string) {
     { accountId: courant.id, kind: "payment", label: "Franprix", category: "Courses", amountCents: scale(-4620), createdAt: new Date(now - 3 * DAY) },
     { accountId: courant.id, kind: "payment", label: "Café de Flore", category: "Restaurants", amountCents: scale(-1250), createdAt: new Date(now - 3 * DAY - 6 * HOUR) },
     { accountId: courant.id, kind: "payment", label: "Orange", category: "Factures", amountCents: scale(-2999), createdAt: new Date(now - 4 * DAY) },
-    { accountId: courant.id, contactId: camille.id, kind: "send", label: "Camille Dupont", category: "Transfert", amountCents: scale(-4000), note: "Cadeau d'anniversaire", createdAt: new Date(now - 5 * DAY) },
+    { accountId: courant.id, kind: "send", label: "Envoi à Camille", category: "Transfert", amountCents: scale(-4000), note: "Cadeau d'anniversaire", createdAt: new Date(now - 5 * DAY) },
     { accountId: courant.id, kind: "payment", label: "Vinted", category: "Shopping", amountCents: scale(-2400), createdAt: new Date(now - 6 * DAY) },
     { accountId: courant.id, kind: "payment", label: "Pharmacie Centre", category: "Santé", amountCents: scale(-870), createdAt: new Date(now - 7 * DAY) },
     { accountId: courant.id, kind: "payment", label: "UGC Ciné Cité", category: "Loisirs", amountCents: scale(-1150), createdAt: new Date(now - 8 * DAY) },
@@ -85,15 +70,13 @@ export async function GET() {
       acc = await db.select().from(accounts).where(eq(accounts.userId, session.id)).orderBy(accounts.createdAt);
     }
 
-    const [ctc, tx, loanRows] = await Promise.all([
-      db.select().from(contacts).where(eq(contacts.userId, session.id)).orderBy(contacts.createdAt),
+    const [tx, loanRows] = await Promise.all([
       db
         .select()
         .from(transactions)
         .where(eq(accounts.userId, session.id))
         .innerJoin(accounts, eq(transactions.accountId, accounts.id))
-        .orderBy(desc(transactions.createdAt))
-        .limit(80),
+        .orderBy(desc(transactions.createdAt)),
       db.select().from(loans).where(eq(loans.userId, session.id)).orderBy(desc(loans.createdAt)),
     ]);
     acc.sort((x, y) => typeRank(x.type) - typeRank(y.type));
@@ -108,7 +91,6 @@ export async function GET() {
         color: a.color,
         last4: a.last4,
       })),
-      contacts: ctc.map((c) => ({ id: c.id, name: c.name, handle: c.handle, color: c.color })),
       transactions: tx.map((t) => ({
         id: t.transactions.id,
         kind: t.transactions.kind as BootstrapData["transactions"][number]["kind"],

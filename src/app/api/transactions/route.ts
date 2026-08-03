@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { accounts, contacts, transactions } from "@/db/schema";
+import { accounts, transactions, users } from "@/db/schema";
 import type { BankUser } from "@/lib/types";
 import { getSessionUser } from "@/lib/auth";
 
@@ -13,7 +13,7 @@ function typeRank(type: string): number {
 
 interface Body {
   kind?: string;
-  contactId?: string;
+  email?: string;
   fromAccountId?: string;
   toAccountId?: string;
   amountCents?: number;
@@ -24,7 +24,7 @@ async function listForUser(userId: string) {
   const acc = await db.select().from(accounts).where(eq(accounts.userId, userId)).orderBy(accounts.createdAt);
   const accIds = acc.map((a) => a.id);
   const txList = accIds.length
-    ? await db.select().from(transactions).where(inArray(transactions.accountId, accIds)).orderBy(desc(transactions.createdAt)).limit(80)
+    ? await db.select().from(transactions).where(inArray(transactions.accountId, accIds)).orderBy(desc(transactions.createdAt))
     : [];
   acc.sort((x, y) => typeRank(x.type) - typeRank(y.type));
   return {
@@ -72,9 +72,26 @@ export async function POST(request: Request) {
     }
 
     if (kind === "send") {
-      const [contact] = await db.select().from(contacts).where(eq(contacts.id, body.contactId ?? "")).limit(1);
-      if (!contact || contact.userId !== session.id) {
-        return NextResponse.json({ error: "Destinataire introuvable" }, { status: 404 });
+      const email = (body.email ?? "").trim().toLowerCase();
+      if (!email || !email.includes("@")) {
+        return NextResponse.json({ error: "Adresse email du destinataire invalide" }, { status: 400 });
+      }
+      const [recipient] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      if (!recipient) {
+        return NextResponse.json({ error: "Aucun utilisateur avec cet email" }, { status: 404 });
+      }
+      if (recipient.id === session.id) {
+        return NextResponse.json({ error: "Vous ne pouvez pas envoyer à vous-même" }, { status: 400 });
+      }
+
+      const [to] = await db
+        .select()
+        .from(accounts)
+        .where(eq(accounts.userId, recipient.id))
+        .orderBy(sql`case when ${accounts.type} = 'courant' then 0 else 1 end`)
+        .limit(1);
+      if (!to) {
+        return NextResponse.json({ error: "Le destinataire n'a pas de compte" }, { status: 404 });
       }
 
       await db.transaction(async (tx) => {
@@ -82,13 +99,24 @@ export async function POST(request: Request) {
           .update(accounts)
           .set({ balanceCents: sql`${accounts.balanceCents} - ${amountCents}` })
           .where(eq(accounts.id, fromAccountId));
+        await tx
+          .update(accounts)
+          .set({ balanceCents: sql`${accounts.balanceCents} + ${amountCents}` })
+          .where(eq(accounts.id, to.id));
         await tx.insert(transactions).values({
           accountId: fromAccountId,
-          contactId: contact.id,
           kind: "send",
-          label: contact.name,
+          label: recipient.name,
           category: "Transfert",
           amountCents: -amountCents,
+          note: body.note?.slice(0, 120) || null,
+        });
+        await tx.insert(transactions).values({
+          accountId: to.id,
+          kind: "receive",
+          label: session.name,
+          category: "Transfert",
+          amountCents: amountCents,
           note: body.note?.slice(0, 120) || null,
         });
       });

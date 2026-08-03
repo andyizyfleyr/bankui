@@ -24,7 +24,7 @@ async function stateFor(userId: string) {
       .from(transactions)
       .where(inArray(transactions.accountId, (await db.select().from(accounts).where(eq(accounts.userId, userId))).map((a) => a.id)))
       .orderBy(desc(transactions.createdAt))
-      .limit(80),
+    ,
   ]);
   return {
     accounts: acc.map((a) => ({ id: a.id, name: a.name, type: a.type, balanceCents: a.balanceCents, color: a.color, last4: a.last4 })),

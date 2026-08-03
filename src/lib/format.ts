@@ -10,6 +10,12 @@ export function formatEUR(cents: number): string {
   return eur.format(cents / 100).replace(/\u202f/g, "\u00a0");
 }
 
+/** Format court : sans décimales quand le montant est rond (ex : 1 000 €). */
+export function formatEURShort(cents: number): string {
+  const s = formatEUR(cents);
+  return cents % 100 === 0 ? s.replace(/,\d{2}\s*/, "") : s;
+}
+
 /** Initiales à partir d'un nom complet. */
 export function initials(name: string): string {
   return name

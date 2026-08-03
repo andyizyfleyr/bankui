@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Account, BankUser, BootstrapData, Contact, Loan, Transaction } from "@/lib/types";
+import type { Account, BankUser, BootstrapData, Loan, SearchUser, Transaction } from "@/lib/types";
 import type { WithdrawProvider } from "@/lib/withdraw";
 
 interface OpResult {
@@ -14,7 +14,6 @@ interface BankContextValue {
   ready: boolean;
   user: BankUser | null;
   accounts: Account[];
-  contacts: Contact[];
   transactions: Transaction[];
   loans: Loan[];
   primary: Account | null;
@@ -23,7 +22,8 @@ interface BankContextValue {
   transferOpen: boolean;
   openTransfer: () => void;
   closeTransfer: () => void;
-  sendMoney: (contactId: string, amountCents: number, note?: string) => Promise<OpResult>;
+  searchUsers: (q: string) => Promise<SearchUser[]>;
+  sendMoney: (email: string, name: string, amountCents: number, note?: string) => Promise<OpResult>;
   makeTransfer: (fromId: string, toId: string, amountCents: number) => Promise<OpResult>;
   addAccount: (name: string, type: Account["type"], balanceCents: number) => Promise<OpResult>;
   requestLoan: (amountCents: number, termMonths: number, accountId?: string) => Promise<OpResult>;
@@ -43,7 +43,6 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<BankUser | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [hidden, setHidden] = useState(false);
@@ -64,7 +63,6 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         if (cancelled || !data) return;
         setUser(data.user);
         setAccounts(data.accounts);
-        setContacts(data.contacts);
         setTransactions(data.transactions);
         setLoans(data.loans ?? []);
         try {
@@ -154,20 +152,31 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
     [reconcile]
   );
 
+  const searchUsers = useCallback(async (q: string): Promise<SearchUser[]> => {
+    if (!q.trim()) return [];
+    try {
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data.users) ? data.users : [];
+    } catch {
+      return [];
+    }
+  }, []);
+
   const sendMoney = useCallback(
-    async (contactId: string, amountCents: number, note?: string): Promise<OpResult> => {
+    async (email: string, name: string, amountCents: number, note?: string): Promise<OpResult> => {
       const from = accounts.find((a) => a.type === "courant");
-      const contact = contacts.find((c) => c.id === contactId);
-      if (!from || !contact) return { ok: false, error: "Données manquantes" };
+      if (!from) return { ok: false, error: "Données manquantes" };
 
       snapshot.current = { accounts, transactions };
       const optimistic: Transaction = {
         id: `opt-${Date.now()}`,
         kind: "send",
-        label: contact.name,
+        label: name,
         category: "Transfert",
         amountCents: -amountCents,
-        contactId,
+        contactId: null,
         note: note || null,
         createdAt: new Date().toISOString(),
       };
@@ -178,7 +187,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/transactions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ kind: "send", contactId, fromAccountId: from.id, amountCents, note }),
+          body: JSON.stringify({ kind: "send", email, fromAccountId: from.id, amountCents, note }),
         });
         return await reconcile(res);
       } catch {
@@ -189,7 +198,7 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
         return { ok: false, error: "Connexion impossible" };
       }
     },
-    [accounts, contacts, transactions, reconcile]
+    [accounts, transactions, reconcile]
   );
 
   const makeTransfer = useCallback(
@@ -242,7 +251,6 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       ready,
       user,
       accounts,
-      contacts,
       transactions,
       loans,
       primary: accounts.find((a) => a.type === "courant") ?? accounts[0] ?? null,
@@ -251,13 +259,14 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       transferOpen,
       openTransfer: () => setTransferOpen(true),
       closeTransfer: () => setTransferOpen(false),
+      searchUsers,
       sendMoney,
       makeTransfer,
       addAccount,
       requestLoan,
       withdraw,
     }),
-    [ready, user, accounts, contacts, transactions, loans, hidden, toggleHidden, transferOpen, sendMoney, makeTransfer, addAccount, requestLoan, withdraw]
+    [ready, user, accounts, transactions, loans, hidden, toggleHidden, transferOpen, searchUsers, sendMoney, makeTransfer, addAccount, requestLoan, withdraw]
   );
 
   return <BankContext.Provider value={value}>{children}</BankContext.Provider>;

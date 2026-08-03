@@ -4,6 +4,14 @@ export interface BankUser {
   email: string;
 }
 
+export interface SearchUser {
+  id: string;
+  name: string;
+  email: string;
+  initials: string;
+  color: string;
+}
+
 export interface Account {
   id: string;
   name: string;
@@ -11,13 +19,6 @@ export interface Account {
   balanceCents: number;
   color: string;
   last4: string;
-}
-
-export interface Contact {
-  id: string;
-  name: string;
-  handle: string;
-  color: string;
 }
 
 export type TxKind = "send" | "receive" | "transfer" | "payment" | "withdraw";
@@ -48,7 +49,6 @@ export interface Loan {
 export interface BootstrapData {
   user: BankUser;
   accounts: Account[];
-  contacts: Contact[];
   transactions: Transaction[];
   loans: Loan[];
 }

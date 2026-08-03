@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { BadgePercent, ChevronLeft, CreditCard, Loader2, Mail, ShieldCheck, Smartphone, Wallet, type LucideIcon } from "lucide-react";
-import { cn, digitsToCents, formatEUR } from "@/lib/format";
+import { cn, digitsToCents, formatEUR, formatEURShort } from "@/lib/format";
 import { useBank } from "@/components/bank/bank-provider";
 import { useOverlay } from "@/components/bank/app-shell";
 import { AmountKeypad } from "@/components/bank/amount-keypad";
@@ -179,18 +179,18 @@ export default function WithdrawPage() {
         <div className={cn("mt-2 text-xs", overdrawn ? "font-medium text-rose" : "text-mut")}>
           {overdrawn ? "Solde insuffisant" : `Disponible : ${hidden ? "•• ••" : formatEUR(source?.balanceCents ?? 0)}`}
         </div>
-        <div className="mt-3 flex justify-center gap-2">
+        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5">
           {AMOUNTS.map((a) => (
             <motion.button
               key={a}
               whileTap={{ scale: 0.92 }}
               onClick={() => setDigits(String(a))}
               className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
+                "shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
                 amount === a ? "border-transparent bg-ink text-white" : "border-line bg-white text-ink hover:bg-ink/[0.05]"
               )}
             >
-              {formatEUR(a)}
+              {formatEURShort(a)}
             </motion.button>
           ))}
         </div>
