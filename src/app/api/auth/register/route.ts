@@ -9,7 +9,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { name?: string; email?: string; password?: string };
+    let body: { name?: string; email?: string; password?: string };
+    try {
+      body = (await request.json()) as { name?: string; email?: string; password?: string };
+    } catch {
+      return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
+    }
     const name = String(body.name ?? "").trim().slice(0, 80);
     const email = String(body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");

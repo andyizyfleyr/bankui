@@ -34,9 +34,17 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
-      const data = await res.json().catch(() => ({}));
+      const text = await res.text();
+      let data: { error?: unknown } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {}
       if (!res.ok) {
-        setError(typeof data.error === "string" ? data.error : "Erreur lors de l'inscription");
+        setError(
+          typeof data.error === "string" && data.error
+            ? data.error
+            : `Erreur inattendue (code ${res.status})`
+        );
         setBusy(false);
         return;
       }

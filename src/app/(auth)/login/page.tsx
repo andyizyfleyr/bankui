@@ -33,9 +33,17 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json().catch(() => ({}));
+      const text = await res.text();
+      let data: { error?: unknown } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {}
       if (!res.ok) {
-        setError(typeof data.error === "string" ? data.error : "E-mail ou mot de passe incorrect");
+        setError(
+          typeof data.error === "string" && data.error
+            ? data.error
+            : `Erreur inattendue (code ${res.status})`
+        );
         setBusy(false);
         return;
       }

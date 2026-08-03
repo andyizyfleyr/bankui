@@ -7,7 +7,12 @@ import { createSession, verifyPassword } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { email?: string; password?: string };
+    let body: { email?: string; password?: string };
+    try {
+      body = (await request.json()) as { email?: string; password?: string };
+    } catch {
+      return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
+    }
     const email = String(body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");
 
