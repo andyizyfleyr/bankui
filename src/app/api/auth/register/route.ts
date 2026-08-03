@@ -25,15 +25,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Mot de passe trop court (6 caractères minimum)" }, { status: 400 });
     }
 
+    console.log("[register] step select", email);
     const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existing.length > 0) {
       return NextResponse.json({ error: "Un compte existe déjà avec cet e-mail" }, { status: 409 });
     }
 
+    console.log("[register] step hash");
     const passwordHash = await hashPassword(password);
+    console.log("[register] step insert");
     const [user] = await db.insert(users).values({ name, email, passwordHash }).returning();
     const safe: BankUser = { id: user.id, name: user.name, email: user.email };
 
+    console.log("[register] step session");
     await createSession(safe);
     return NextResponse.json({ user: safe });
   } catch (error) {

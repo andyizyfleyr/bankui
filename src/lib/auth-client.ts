@@ -1,4 +1,19 @@
 /** Envoie une requête d'auth avec 1 seule nouvelle tentative en cas d'erreur 5xx transitoire. */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;|&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function authRequest(
   url: string,
   payload: Record<string, string>
@@ -21,7 +36,7 @@ export async function authRequest(
       const message =
         typeof data.error === "string" && data.error
           ? data.error
-          : `Erreur inattendue (code ${res.status}) — ${text.slice(0, 3000) || "réponse vide"}`;
+          : `Erreur inattendue (code ${res.status}) — ${htmlToText(text).slice(-1500) || "réponse vide"}`;
       if (res.status >= 500 && attempts < 2) {
         await new Promise((r) => setTimeout(r, 700));
         continue;
