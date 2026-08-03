@@ -229,6 +229,13 @@ export default function SendPage() {
                   +{formatEURShort(q.add)}
                 </motion.button>
               ))}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setDigits(String(primary?.balanceCents ?? 0))}
+                className="shrink-0 rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-white"
+              >
+                Max
+              </motion.button>
             </div>
           </div>
 

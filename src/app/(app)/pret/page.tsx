@@ -128,6 +128,16 @@ export default function LoanPage() {
               {formatEURShort(a)}
             </motion.button>
           ))}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setDigits(String(MAX_LOAN_CENTS))}
+            className={cn(
+              "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
+              amount === MAX_LOAN_CENTS ? "border-transparent bg-ink text-white" : "bg-ink/[0.06] text-ink"
+            )}
+          >
+            Max
+          </motion.button>
         </div>
       </div>
 

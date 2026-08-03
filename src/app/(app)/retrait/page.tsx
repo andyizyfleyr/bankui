@@ -54,6 +54,16 @@ export default function WithdrawPage() {
   const overdrawn = source ? total > source.balanceCents : false;
   const valid = identifierOk && inRange && !overdrawn && !!source;
 
+  // Montant maximal : min(limite, solde après frais) avec solde couvrant le total.
+  const maxCents = useMemo(() => {
+    if (!source) return 0;
+    const cap = Math.min(WITHDRAW_MAX_CENTS, source.balanceCents);
+    const p = provider.feePercent;
+    let m = Math.floor((source.balanceCents * 100) / (100 + p));
+    while (m > 0 && m + withdrawFeeCents(m, p) > source.balanceCents) m -= 1;
+    return Math.min(cap, Math.max(0, m));
+  }, [source, provider.feePercent]);
+
   // Confirmation / succès au-dessus de l'interface (plein cadre, sans scroll)
   useEffect(() => {
     if (stage === "compose") {
@@ -193,6 +203,16 @@ export default function WithdrawPage() {
               {formatEURShort(a)}
             </motion.button>
           ))}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setDigits(String(maxCents))}
+            className={cn(
+              "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors",
+              amount === maxCents ? "border-transparent bg-ink text-white" : "bg-ink/[0.06] text-ink"
+            )}
+          >
+            Max
+          </motion.button>
         </div>
       </div>
 
