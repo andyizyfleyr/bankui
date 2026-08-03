@@ -15,7 +15,7 @@ const RATE = 5;
 const AMOUNTS = [10_000, 50_000, 100_000, 500_000, 1_000_000];
 const TERMS = [12, 24, 36, 48, 60];
 const MIN_LOAN_CENTS = 10_000;
-const MAX_LOAN_CENTS = 10_000_000;
+const MAX_LOAN_CENTS = 1_000_000;
 
 type Stage = "compose" | "confirm" | "busy" | "done";
 

@@ -8,7 +8,7 @@ import { getSessionUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 const MIN_LOAN_CENTS = 10_000;
-const MAX_LOAN_CENTS = 10_000_000;
+const MAX_LOAN_CENTS = 1_000_000;
 const ANNUAL_RATE_PERCENT = 5;
 
 function monthlyPaymentCents(amountCents: number, annualRatePercent: number, termMonths: number): number {
