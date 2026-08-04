@@ -99,9 +99,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="px-5 pb-10 pt-6 md:mx-auto md:max-w-[1120px] md:px-8 md:pb-16 md:pt-8">
-      {/* En-tête */}
-      <motion.div {...fadeUp} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+    <div className="px-5 pb-10 pt-0 md:mx-auto md:max-w-[1120px] md:px-8 md:pb-16 md:pt-8">
+      {/* En-tête — masqué sur mobile */}
+      <motion.div {...fadeUp} transition={{ duration: 0.4 }} className="hidden items-center justify-between md:flex">
         <div className="flex items-center gap-3">
           <ContactAvatar name={user?.name ?? "N V"} color="#0D9F6E" size={44} />
           <div>
@@ -127,7 +127,7 @@ export default function HomePage() {
       <motion.div
         {...fadeUp}
         transition={{ duration: 0.45, delay: 0.06 }}
-        className="card-shadow relative mt-5 overflow-hidden rounded-[28px] bg-white p-5 md:col-span-8 md:mt-0"
+        className="card-shadow relative -mx-5 mt-0 overflow-hidden rounded-none bg-white p-5 md:col-span-8 md:mx-0 md:mt-0 md:rounded-[28px]"
       >
         <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-lime/40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-8 h-36 w-36 rounded-full bg-violet/15 blur-3xl" />
