@@ -127,18 +127,20 @@ export default function HomePage() {
       <motion.div
         {...fadeUp}
         transition={{ duration: 0.45, delay: 0.06 }}
-        className="card-shadow relative -mx-5 mt-0 overflow-hidden rounded-none bg-white p-5 md:col-span-8 md:mx-0 md:mt-0 md:rounded-[28px]"
+        className="card-shadow relative -mx-5 mt-0 overflow-hidden rounded-t-none rounded-b-[28px] bg-ink p-5 [--spark-start:#98a2b3] [--spark-end:#ffffff] md:col-span-8 md:mx-0 md:mt-0 md:rounded-[28px] md:bg-white md:[--spark-end:#0b0f14]"
       >
-        <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-lime/40 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-8 h-36 w-36 rounded-full bg-violet/15 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-lime/30 blur-3xl md:bg-lime/40" />
+        <div className="pointer-events-none absolute -bottom-20 -left-8 h-36 w-36 rounded-full bg-violet/25 blur-3xl md:bg-violet/15" />
 
         <div className="relative flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-mut">Solde total</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50 md:text-mut">
+            Solde total
+          </span>
           <motion.button
             whileTap={{ scale: 0.85 }}
             onClick={toggleHidden}
             aria-label={hidden ? "Afficher le solde" : "Masquer le solde"}
-            className="grid h-8 w-8 place-items-center rounded-full bg-ink/[0.05] text-mut transition-colors hover:text-ink"
+            className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/60 transition-colors hover:text-white md:bg-ink/[0.05] md:text-mut md:hover:text-ink"
           >
             {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </motion.button>
@@ -147,7 +149,7 @@ export default function HomePage() {
         <AnimatedMoney
           cents={total}
           hidden={hidden}
-          className="relative mt-1.5 block font-display text-[42px] font-semibold leading-none tracking-tight text-ink"
+          className="relative mt-1.5 block font-display text-[42px] font-semibold leading-none tracking-tight text-white md:text-ink"
         />
 
         <div className="relative mt-4 flex items-center justify-between">
@@ -155,7 +157,9 @@ export default function HomePage() {
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold",
-                trend.up ? "bg-rose/10 text-rose" : "bg-mint/10 text-mint"
+                trend.up
+                  ? "bg-white/10 text-rose md:bg-rose/10 md:text-rose"
+                  : "bg-white/10 text-lime md:bg-mint/10 md:text-mint"
               )}
             >
               {trend.up ? (
@@ -166,7 +170,7 @@ export default function HomePage() {
               {trend.flat ? "Stable ce mois" : `${trend.delta.toFixed(1).replace(".", ",")} % ce mois`}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-2.5 py-1 text-[11px] font-bold text-mut">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white/70 md:bg-ink/[0.05] md:text-mut">
               <TrendingUp className="h-3.5 w-3.5" />
               Premiers relevés
             </span>
@@ -174,8 +178,8 @@ export default function HomePage() {
           <svg width="92" height="30" viewBox="0 0 96 32" fill="none" aria-hidden>
             <defs>
               <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stopColor="#98A2B3" stopOpacity="0.5" />
-                <stop offset="1" stopColor="#0B0F14" />
+                <stop offset="0" style={{ stopColor: "var(--spark-start)" }} stopOpacity="0.5" />
+                <stop offset="1" style={{ stopColor: "var(--spark-end)" }} />
               </linearGradient>
             </defs>
             <path
