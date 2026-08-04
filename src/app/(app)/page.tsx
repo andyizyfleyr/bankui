@@ -252,13 +252,13 @@ export default function HomePage() {
               whileTap={{ scale: 0.85 }}
               onClick={() => setAddOpen(true)}
               aria-label="Ajouter un compte"
-              className="grid h-7 w-7 place-items-center rounded-full bg-ink text-white shadow-[0_8px_16px_-6px_rgba(11,15,20,0.4)]"
+              className="grid h-9 w-9 place-items-center rounded-full bg-ink text-white shadow-[0_8px_16px_-6px_rgba(11,15,20,0.4)]"
             >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2.5} />
             </motion.button>
           </div>
         </div>
-        <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0">
+        <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-4 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0">
           {accounts.map((account) => (
             <AccountCard key={account.id} account={account} hidden={hidden} />
           ))}
@@ -267,7 +267,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Transactions récentes */}
-      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.3 }} className="mt-8 md:col-span-12 md:mt-6">
+      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.3 }} className="mt-6 md:col-span-12 md:mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-base font-semibold text-ink">Transactions récentes</h2>
           <Link href="/activity" className="flex items-center gap-1 text-xs font-bold text-ink">
