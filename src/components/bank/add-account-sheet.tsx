@@ -35,6 +35,15 @@ export function AddAccountSheet({ open, onClose }: { open: boolean; onClose: () 
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && stage !== "busy") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, stage, onClose]);
+
   const balance = digitsToCents(digits);
   const valid = name.trim().length >= 2 && stage !== "busy";
 

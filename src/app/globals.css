@@ -85,6 +85,21 @@ button {
   font: inherit;
 }
 
+/* Focus clavier visible (souris uniquement : aucun contour) */
+:where(button, a, [role="button"], input, select, textarea):focus:not(:focus-visible) {
+  outline: none;
+}
+
+:where(button, a, [role="button"]):focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+:where(input, select, textarea):focus-visible {
+  outline: 2px solid rgba(11, 15, 20, 0.4);
+  outline-offset: 0;
+}
+
 /* Mobile : pas de délai de double-tap / zoom accidentel sur les éléments interactifs */
 button,
 a,

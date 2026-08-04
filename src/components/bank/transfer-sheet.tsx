@@ -39,6 +39,15 @@ export function TransferSheet() {
     }
   }, [transferOpen, accounts]);
 
+  useEffect(() => {
+    if (!transferOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && stage !== "busy") closeTransfer();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [transferOpen, stage, closeTransfer]);
+
   const from = accounts.find((a) => a.id === fromId) ?? null;
   const to = accounts.find((a) => a.id === toId) ?? null;
   const cents = digitsToCents(digits);

@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nova — Banque mobile",
+  title: "Nova — Banque",
   description: "Votre banque au quotidien : comptes, envois instantanés et transferts.",
 };
 

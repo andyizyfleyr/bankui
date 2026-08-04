@@ -129,7 +129,7 @@ export default function ActivityPage() {
             <h2 className="font-display text-base font-semibold text-ink">Répartition des dépenses</h2>
           </div>
 
-          <div className="mt-4 flex items-center gap-5">
+          <div className="mt-4 flex items-center gap-5 md:justify-center md:gap-16">
             <div className="relative shrink-0">
               <svg viewBox="0 0 140 140" className="h-[124px] w-[124px] -rotate-90">
                 <circle cx="70" cy="70" r="52" fill="none" stroke="#EEF0F4" strokeWidth="16" />
@@ -169,7 +169,7 @@ export default function ActivityPage() {
               </div>
             </div>
 
-            <ul className="min-w-0 flex-1 space-y-2">
+            <ul className="min-w-0 flex-1 space-y-2 md:max-w-[340px]">
               {donut.segs.map((s) => (
                 <li key={s.label} className="flex items-center gap-2">
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: s.color }} />

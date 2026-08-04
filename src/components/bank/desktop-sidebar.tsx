@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
-  CreditCard,
   House,
   Landmark,
   LogOut,
@@ -15,7 +14,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "@/lib/format";
+import { cn, formatEUR } from "@/lib/format";
 import { useBank } from "./bank-provider";
 import { ContactAvatar } from "./avatar";
 import { NovaLogo } from "./nova-logo";
@@ -36,11 +35,18 @@ const NAV: Item[] = [
 
 export function DesktopSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, accounts, openTransfer, hidden } = useBank();
   const total = accounts.reduce((s, a) => s + a.balanceCents, 0);
 
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    router.push("/login");
+    router.refresh();
+  };
+
   return (
-    <aside className="hidden w-[264px] shrink-0 flex-col border-r border-line bg-white/70 px-4 py-6 backdrop-blur-xl md:flex">
+    <aside className="no-scrollbar hidden w-[264px] shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-white/70 px-4 py-6 backdrop-blur-xl md:flex">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-2">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-ink text-lime">
@@ -53,7 +59,7 @@ export function DesktopSidebar() {
       <div className="card-shadow mt-6 rounded-3xl bg-ink p-4">
         <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">Solde total</div>
         <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
-          {hidden ? "•• ••" : new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(total / 100)}
+          {hidden ? "•• ••" : formatEUR(total)}
         </div>
       </div>
 
@@ -114,13 +120,13 @@ export function DesktopSidebar() {
             <div className="truncate text-sm font-semibold text-ink">{user?.name ?? "…"}</div>
             <div className="truncate text-[11px] text-mut">{user?.email ?? ""}</div>
           </div>
-          <Link
-            href="/api/auth/logout"
+          <button
+            onClick={logout}
             aria-label="Se déconnecter"
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.05] text-mut transition-colors hover:bg-rose/10 hover:text-rose"
           >
             <LogOut className="h-4 w-4" strokeWidth={2.2} />
-          </Link>
+          </button>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <MiniStat value={String(accounts.length)} label="Comptes" />

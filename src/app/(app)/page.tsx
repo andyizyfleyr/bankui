@@ -123,7 +123,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Carte solde */}
-      <div className="mt-5 md:mt-6 md:grid md:grid-cols-12 md:gap-6">
+      <div className="md:mt-6 md:grid md:grid-cols-12 md:gap-6">
       <motion.div
         {...fadeUp}
         transition={{ duration: 0.45, delay: 0.06 }}
@@ -189,18 +189,22 @@ export default function HomePage() {
       </motion.div>
 
       {/* Actions rapides */}
-      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.12 }} className="mt-6 flex justify-between px-1 md:col-span-4 md:mt-0 md:flex-col md:gap-3 md:px-0">
+      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.12 }} className="mt-6 flex justify-between px-1 md:col-span-4 md:mt-0 md:grid md:grid-cols-2 md:content-start md:gap-2 md:px-0">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
-            <button key={action.label} onClick={action.onClick} className="flex w-[68px] flex-col items-center gap-2">
+            <button
+              key={action.label}
+              onClick={action.onClick}
+              className="flex w-[68px] flex-col items-center gap-2 md:w-auto md:min-h-[92px] md:justify-center md:rounded-2xl md:border md:border-line md:bg-white md:py-2 md:transition-colors md:hover:bg-ink/[0.04]"
+            >
               <motion.span
                 whileTap={{ scale: 0.88 }}
                 className="card-shadow grid h-14 w-14 place-items-center rounded-full bg-white text-ink"
               >
                 <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
               </motion.span>
-              <span className="text-xs font-medium text-mut">{action.label}</span>
+              <span className="text-xs font-medium text-mut md:text-sm md:font-semibold md:text-ink">{action.label}</span>
             </button>
           );
         })}

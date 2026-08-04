@@ -275,7 +275,7 @@ export default function SendPage() {
                 : `Disponible : ${hidden ? "•• ••" : formatEUR(primary?.balanceCents ?? 0)}`}
             </div>
             {/* Montants rapides — scrollables horizontalement */}
-            <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5">
+            <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:-mx-6 md:px-6">
               {QUICK.map((q) => (
                 <motion.button
                   key={q.label}
@@ -349,6 +349,14 @@ interface OverlayProps {
 }
 
 function SendOverlay(p: OverlayProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [p.stage, p.onCancel]);
+
   if (p.stage === "done") {
     return (
       <motion.div

@@ -114,7 +114,7 @@ export default function LoanPage() {
           {hidden ? "•• ••" : formatEUR(amount)}
         </div>
         <div className="mt-2 text-xs text-mut">de 100 € à 10 000 €</div>
-        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5">
+        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:-mx-6 md:px-6">
           {AMOUNTS.map((a) => (
             <motion.button
               key={a}
@@ -251,6 +251,14 @@ interface OverlayProps {
 }
 
 function LoanOverlay(p: OverlayProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [p.stage, p.onCancel]);
+
   if (p.stage === "done") {
     return (
       <motion.div

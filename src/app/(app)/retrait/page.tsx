@@ -126,7 +126,7 @@ export default function WithdrawPage() {
       {/* Destinataire — chips scrollables horizontalement */}
       <div className="flex-none pt-3">
         <span className="text-xs font-bold uppercase tracking-[0.12em] text-mut">Destinataire</span>
-        <div className="no-scrollbar -mx-5 mt-2 flex gap-2.5 overflow-x-auto px-5 pb-0.5">
+        <div className="no-scrollbar -mx-5 mt-2 flex gap-2.5 overflow-x-auto px-5 pb-0.5 md:-mx-6 md:px-6 md:pb-0">
           {WITHDRAW_PROVIDER_LIST.map((p) => {
             const active = p.id === providerId;
             return (
@@ -189,7 +189,7 @@ export default function WithdrawPage() {
         <div className={cn("mt-2 text-xs", overdrawn ? "font-medium text-rose" : "text-mut")}>
           {overdrawn ? "Solde insuffisant" : `Disponible : ${hidden ? "•• ••" : formatEUR(source?.balanceCents ?? 0)}`}
         </div>
-        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5">
+        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:-mx-6 md:px-6">
           {AMOUNTS.map((a) => (
             <motion.button
               key={a}
@@ -268,6 +268,14 @@ interface OverlayProps {
 }
 
 function WithdrawOverlay(p: OverlayProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [p.stage, p.onCancel]);
+
   if (p.stage === "done") {
     return (
       <motion.div
