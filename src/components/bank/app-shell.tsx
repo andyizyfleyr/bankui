@@ -6,7 +6,7 @@ import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { BankProvider, useBank } from "./bank-provider";
 import { BottomNav } from "./bottom-nav";
-import { PhoneFrame } from "./phone-frame";
+import { DesktopSidebar } from "./desktop-sidebar";
 import { TransferSheet } from "./transfer-sheet";
 
 /* Overlay plein cadre (au-dessus de la nav) pour les confirmations des pages. */
@@ -29,14 +29,19 @@ function ShellInner({ children }: { children: ReactNode }) {
 
   return (
     <OverlayContext.Provider value={setOverlay}>
-      <div ref={scrollRef} className="no-scrollbar relative min-h-0 flex-1 overflow-y-auto">
-        {children}
+      <div className="relative flex h-dvh overflow-hidden md:h-screen">
+        <DesktopSidebar />
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-paper">
+          <div ref={scrollRef} className="no-scrollbar relative min-h-0 flex-1 overflow-y-auto">
+            {children}
+          </div>
+          <BottomNav />
+          <TransferSheet />
+          <AnimatePresence>
+            {overlay ? <div className="absolute inset-0 z-[65]">{overlay}</div> : null}
+          </AnimatePresence>
+        </div>
       </div>
-      <BottomNav />
-      <TransferSheet />
-      <AnimatePresence>
-        {overlay ? <div className="absolute inset-0 z-[65]">{overlay}</div> : null}
-      </AnimatePresence>
 
       <AnimatePresence>
         {!ready && (
@@ -73,12 +78,14 @@ function ShellInner({ children }: { children: ReactNode }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <PhoneFrame>
-      <BankProvider>
-        <MotionConfig reducedMotion="user">
-          <ShellInner>{children}</ShellInner>
-        </MotionConfig>
-      </BankProvider>
-    </PhoneFrame>
+    <div className="ambient relative min-h-dvh md:min-h-screen">
+      <div className="grain relative">
+        <BankProvider>
+          <MotionConfig reducedMotion="user">
+            <ShellInner>{children}</ShellInner>
+          </MotionConfig>
+        </BankProvider>
+      </div>
+    </div>
   );
 }

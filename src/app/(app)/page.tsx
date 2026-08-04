@@ -99,7 +99,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="px-5 pb-10 pt-6">
+    <div className="px-5 pb-10 pt-6 md:mx-auto md:max-w-[1120px] md:px-8 md:pb-16 md:pt-8">
       {/* En-tête */}
       <motion.div {...fadeUp} transition={{ duration: 0.4 }} className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -123,10 +123,11 @@ export default function HomePage() {
       </motion.div>
 
       {/* Carte solde */}
+      <div className="mt-5 md:mt-6 md:grid md:grid-cols-12 md:gap-6">
       <motion.div
         {...fadeUp}
         transition={{ duration: 0.45, delay: 0.06 }}
-        className="card-shadow relative mt-5 overflow-hidden rounded-[28px] bg-white p-5"
+        className="card-shadow relative mt-5 overflow-hidden rounded-[28px] bg-white p-5 md:col-span-8 md:mt-0"
       >
         <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-lime/40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-8 h-36 w-36 rounded-full bg-violet/15 blur-3xl" />
@@ -188,7 +189,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Actions rapides */}
-      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.12 }} className="mt-6 flex justify-between px-1">
+      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.12 }} className="mt-6 flex justify-between px-1 md:col-span-4 md:mt-0 md:flex-col md:gap-3 md:px-0">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
@@ -209,7 +210,7 @@ export default function HomePage() {
       <motion.div
         {...fadeUp}
         transition={{ duration: 0.45, delay: 0.18 }}
-        className="card-shadow mt-7 rounded-[28px] bg-white p-5"
+        className="card-shadow mt-7 rounded-[28px] bg-white p-5 md:col-span-4 md:mt-0"
       >
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-base font-semibold text-ink">Cette semaine</h2>
@@ -238,7 +239,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Mes comptes */}
-      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.24 }} className="mt-8">
+      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.24 }} className="mt-8 md:col-span-8 md:mt-0">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-base font-semibold text-ink">Mes comptes</h2>
           <div className="flex items-center gap-2">
@@ -253,7 +254,7 @@ export default function HomePage() {
             </motion.button>
           </div>
         </div>
-        <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+        <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0">
           {accounts.map((account) => (
             <AccountCard key={account.id} account={account} hidden={hidden} />
           ))}
@@ -262,7 +263,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Transactions récentes */}
-      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.3 }} className="mt-8">
+      <motion.div {...fadeUp} transition={{ duration: 0.45, delay: 0.3 }} className="mt-8 md:col-span-12 md:mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-base font-semibold text-ink">Transactions récentes</h2>
           <Link href="/activity" className="flex items-center gap-1 text-xs font-bold text-ink">
@@ -280,6 +281,7 @@ export default function HomePage() {
           </ul>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }
@@ -291,7 +293,7 @@ function AccountCard({ account, hidden }: { account: Account; hidden: boolean })
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
-      className="card-shadow relative w-[236px] shrink-0 snap-center overflow-hidden rounded-[24px] bg-white p-4"
+      className="card-shadow relative w-[236px] shrink-0 snap-center overflow-hidden rounded-[24px] bg-white p-4 md:w-auto md:snap-none"
     >
       <div
         className="pointer-events-none absolute -right-9 -top-9 h-24 w-24 rounded-full blur-2xl"

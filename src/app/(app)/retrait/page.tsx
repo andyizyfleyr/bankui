@@ -104,7 +104,7 @@ export default function WithdrawPage() {
   }, [stage, providerId, identifier, amount, fee, total, error, hidden]);
 
   return (
-    <div className="flex h-full min-h-full flex-col px-5 pb-6 pt-4">
+    <div className="flex h-full min-h-full flex-col px-5 pb-6 pt-4 md:mx-auto md:w-full md:max-w-[520px] md:px-6 md:pt-6">
       {/* En-tête */}
       <div className="flex flex-none items-center gap-3">
         <Link
@@ -313,7 +313,7 @@ function WithdrawOverlay(p: OverlayProps) {
         animate={{ y: 0 }}
         exit={{ y: "45%" }}
         transition={{ type: "spring", stiffness: 340, damping: 33 }}
-        className="relative rounded-t-[32px] bg-white px-5 pb-8 pt-2.5 shadow-[0_-24px_60px_-24px_rgba(16,24,40,0.35)]"
+        className="relative w-full rounded-t-[32px] bg-white px-5 pb-8 pt-2.5 shadow-[0_-24px_60px_-24px_rgba(16,24,40,0.35)] md:mx-auto md:mb-8 md:max-w-[440px] md:rounded-[32px] md:shadow-[0_40px_80px_-32px_rgba(16,24,40,0.5)]"
       >
         <div className="mx-auto mb-5 h-[5px] w-10 rounded-full bg-ink/[0.12]" />
 

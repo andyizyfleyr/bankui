@@ -54,7 +54,7 @@ export function BottomNav() {
   const { openTransfer } = useBank();
 
   return (
-    <nav className="safe-bottom relative z-40 border-t border-line bg-white/90 pt-2 backdrop-blur-xl">
+    <nav className="safe-bottom relative z-40 border-t border-line bg-white/90 pt-2 backdrop-blur-xl md:hidden">
       <div className="relative flex items-start px-3">
         {leftTabs.map((t) => (
           <NavTab key={t.href} tab={t} active={isActive(pathname, t.href)} />

@@ -69,8 +69,8 @@ export default function ActivityPage() {
   }, [filtered]);
 
   return (
-    <div className="pb-10">
-      <div className="sticky top-0 z-10 border-b border-line bg-paper/85 px-5 pb-4 pt-6 backdrop-blur-xl">
+    <div className="pb-10 md:mx-auto md:max-w-[1020px] md:px-8 md:pb-16">
+      <div className="sticky top-0 z-10 border-b border-line bg-paper/85 px-5 pb-4 pt-6 backdrop-blur-xl md:px-0">
         <h1 className="font-display text-xl font-semibold tracking-tight text-ink">Activité</h1>
         <p className="mt-0.5 text-xs capitalize text-mut">Résumé de {monthName}</p>
 
@@ -91,7 +91,7 @@ export default function ActivityPage() {
           />
         </div>
 
-        <div className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5">
+        <div className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
           {FILTERS.map((f) => (
             <button
               key={f.id}
@@ -120,7 +120,7 @@ export default function ActivityPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05 }}
-          className="card-shadow mx-5 mt-5 rounded-[28px] bg-white p-5"
+          className="card-shadow mx-5 mt-5 rounded-[28px] bg-white p-5 md:mx-0"
         >
           <div className="flex items-center gap-2">
             <span className="grid h-7 w-7 place-items-center rounded-lg bg-violet/10 text-violet">
@@ -185,7 +185,7 @@ export default function ActivityPage() {
       )}
 
       {/* Historique groupé par jour */}
-      <div className="px-5 pt-6">
+      <div className="px-5 pt-6 md:px-0 md:pt-8">
         {groups.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <span className="card-shadow grid h-14 w-14 place-items-center rounded-3xl bg-white text-faint">

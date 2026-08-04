@@ -61,7 +61,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="px-5 pb-12 pt-6">
+    <div className="px-5 pb-12 pt-6 md:mx-auto md:max-w-[640px] md:px-8 md:pb-16 md:pt-8">
       <h1 className="font-display text-xl font-semibold tracking-tight text-ink">Réglages</h1>
 
       {/* Profil */}

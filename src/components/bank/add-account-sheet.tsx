@@ -64,7 +64,7 @@ export function AddAccountSheet({ open, onClose }: { open: boolean; onClose: () 
             onClick={() => stage !== "busy" && onClose()}
           />
           <motion.div
-            className="absolute inset-x-0 bottom-0 max-h-[94%] overflow-hidden rounded-t-[32px] bg-white shadow-[0_-24px_60px_-24px_rgba(16,24,40,0.35)]"
+            className="absolute inset-x-0 bottom-0 mx-auto max-h-[94%] w-full max-w-[440px] overflow-hidden rounded-t-[32px] bg-white shadow-[0_-24px_60px_-24px_rgba(16,24,40,0.35)] md:mb-8 md:rounded-[32px] md:shadow-[0_40px_80px_-32px_rgba(16,24,40,0.5)]"
             initial={{ y: "105%" }}
             animate={{ y: 0 }}
             exit={{ y: "105%" }}
