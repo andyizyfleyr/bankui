@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -268,13 +269,14 @@ interface OverlayProps {
 }
 
 function WithdrawOverlay(p: OverlayProps) {
+  const { stage, onCancel } = p;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+      if (e.key === "Escape" && stage !== "busy" && stage !== "done") onCancel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [p.stage, p.onCancel]);
+  }, [stage, onCancel]);
 
   if (p.stage === "done") {
     return (
@@ -408,7 +410,15 @@ function ProviderLogo({ logo, size = 40 }: { logo: string; size?: number }) {
     <span
       className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl border border-line bg-white"
     >
-      <img src={logo} alt="" className="object-contain" style={{ width: size, height: size }} draggable={false} />
+      <Image
+        src={logo}
+        alt=""
+        width={size}
+        height={size}
+        className="object-contain"
+        draggable={false}
+        unoptimized
+      />
     </span>
   );
 }

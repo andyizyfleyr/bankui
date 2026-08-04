@@ -40,13 +40,17 @@ export default function SettingsPage() {
   const { user, accounts, transactions } = useBank();
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
 
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     try {
-      const raw = localStorage.getItem(`nova:prefs:${user.id}`);
-      if (raw) setPrefs({ ...DEFAULT_PREFS, ...JSON.parse(raw) });
+      const raw = localStorage.getItem(`nova:prefs:${userId}`);
+      if (!raw) return;
+      const parsed = { ...DEFAULT_PREFS, ...JSON.parse(raw) };
+      const raf = requestAnimationFrame(() => setPrefs(parsed));
+      return () => cancelAnimationFrame(raf);
     } catch {}
-  }, [user?.id]);
+  }, [userId]);
 
   const update = (key: keyof Prefs, value: boolean) => {
     setPrefs((p) => {

@@ -46,19 +46,24 @@ export default function SendPage() {
   useEffect(() => {
     let cancelled = false;
     const q = query.trim();
-    if (q.length < 2) {
-      setResults([]);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    const t = setTimeout(async () => {
-      const res = await searchUsers(q);
-      if (!cancelled) {
-        setResults(res);
-        setSearching(false);
-      }
-    }, 220);
+    const t = setTimeout(
+      async () => {
+        if (q.length < 2) {
+          if (!cancelled) {
+            setResults([]);
+            setSearching(false);
+          }
+          return;
+        }
+        setSearching(true);
+        const res = await searchUsers(q);
+        if (!cancelled) {
+          setResults(res);
+          setSearching(false);
+        }
+      },
+      q.length < 2 ? 0 : 220
+    );
     return () => {
       cancelled = true;
       clearTimeout(t);
@@ -349,13 +354,14 @@ interface OverlayProps {
 }
 
 function SendOverlay(p: OverlayProps) {
+  const { stage, onCancel } = p;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+      if (e.key === "Escape" && stage !== "busy" && stage !== "done") onCancel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [p.stage, p.onCancel]);
+  }, [stage, onCancel]);
 
   if (p.stage === "done") {
     return (

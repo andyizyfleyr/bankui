@@ -14,7 +14,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { cn, formatEUR } from "@/lib/format";
+import { cn } from "@/lib/format";
 import { useBank } from "./bank-provider";
 import { ContactAvatar } from "./avatar";
 import { NovaLogo } from "./nova-logo";
@@ -36,8 +36,7 @@ const NAV: Item[] = [
 export function DesktopSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, accounts, openTransfer, hidden } = useBank();
-  const total = accounts.reduce((s, a) => s + a.balanceCents, 0);
+  const { user, openTransfer } = useBank();
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
@@ -53,14 +52,6 @@ export function DesktopSidebar() {
           <NovaLogo size={24} />
         </span>
         <span className="font-display text-xl font-semibold tracking-tight text-ink">Nova</span>
-      </div>
-
-      {/* Solde */}
-      <div className="card-shadow mt-6 rounded-3xl bg-ink p-4">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">Solde total</div>
-        <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
-          {hidden ? "•• ••" : formatEUR(total)}
-        </div>
       </div>
 
       {/* Navigation */}
@@ -112,36 +103,25 @@ export function DesktopSidebar() {
         Transfert entre comptes
       </motion.button>
 
-      {/* Profil */}
-      <div className="border-t border-line pt-4">
-        <div className="flex items-center gap-3 px-1">
-          <ContactAvatar name={user?.name ?? "N V"} color="#0D9F6E" size={42} />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-ink">{user?.name ?? "…"}</div>
-            <div className="truncate text-[11px] text-mut">{user?.email ?? ""}</div>
+      {/* Profil — masqué sur /settings où la page affiche déjà l'identité */}
+      {!pathname.startsWith("/settings") && (
+        <div className="border-t border-line pt-4">
+          <div className="flex items-center gap-3 px-1">
+            <ContactAvatar name={user?.name ?? "N V"} color="#0D9F6E" size={42} />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-semibold text-ink">{user?.name ?? "…"}</div>
+              <div className="truncate text-[11px] text-mut">{user?.email ?? ""}</div>
+            </div>
+            <button
+              onClick={logout}
+              aria-label="Se déconnecter"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.05] text-mut transition-colors hover:bg-rose/10 hover:text-rose"
+            >
+              <LogOut className="h-4 w-4" strokeWidth={2.2} />
+            </button>
           </div>
-          <button
-            onClick={logout}
-            aria-label="Se déconnecter"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.05] text-mut transition-colors hover:bg-rose/10 hover:text-rose"
-          >
-            <LogOut className="h-4 w-4" strokeWidth={2.2} />
-          </button>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <MiniStat value={String(accounts.length)} label="Comptes" />
-          <MiniStat value="Premium" label="Offre" />
-        </div>
-      </div>
+      )}
     </aside>
-  );
-}
-
-function MiniStat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-2xl bg-paper/80 px-3 py-2 text-center">
-      <div className="truncate font-display text-sm font-bold text-ink">{value}</div>
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-faint">{label}</div>
-    </div>
   );
 }

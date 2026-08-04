@@ -27,8 +27,11 @@ export function TransferSheet() {
   const [error, setError] = useState<string | null>(null);
   const [swaps, setSwaps] = useState(0);
 
-  useEffect(() => {
-    if (transferOpen && accounts.length > 0) {
+  const openKey = transferOpen ? accounts.map((a) => a.id).join("|") : null;
+  const [resetKey, setResetKey] = useState<string | null>(openKey);
+  if (openKey !== resetKey) {
+    setResetKey(openKey);
+    if (openKey !== null) {
       const courant = accounts.find((a) => a.type === "courant") ?? accounts[0];
       const other = accounts.find((a) => a.id !== courant.id) ?? accounts[0];
       setFromId(courant.id);
@@ -37,7 +40,7 @@ export function TransferSheet() {
       setStage("edit");
       setError(null);
     }
-  }, [transferOpen, accounts]);
+  }
 
   useEffect(() => {
     if (!transferOpen) return;

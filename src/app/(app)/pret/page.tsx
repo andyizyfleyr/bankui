@@ -251,13 +251,14 @@ interface OverlayProps {
 }
 
 function LoanOverlay(p: OverlayProps) {
+  const { stage, onCancel } = p;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && p.stage !== "busy" && p.stage !== "done") p.onCancel();
+      if (e.key === "Escape" && stage !== "busy" && stage !== "done") onCancel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [p.stage, p.onCancel]);
+  }, [stage, onCancel]);
 
   if (p.stage === "done") {
     return (

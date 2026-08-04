@@ -28,6 +28,7 @@ export default function ActivityPage() {
   });
   const received = monthTx.filter((t) => t.amountCents > 0).reduce((s, t) => s + t.amountCents, 0);
   const spent = monthTx.filter((t) => t.amountCents < 0).reduce((s, t) => s + Math.abs(t.amountCents), 0);
+  const spendCount = monthTx.filter((t) => t.amountCents < 0).length;
   const monthName = now.toLocaleDateString("fr-FR", { month: "long" });
 
   /* Répartition des dépenses du mois par catégorie (top 4 + autre) */
@@ -162,9 +163,9 @@ export default function ActivityPage() {
               <div className="absolute inset-0 grid place-items-center text-center">
                 <div>
                   <div className="font-display text-sm font-bold tabular-nums text-ink">
-                    {hidden ? "••" : formatEUR(donut.total)}
+                    {hidden ? "••" : spendCount}
                   </div>
-                  <div className="text-[10px] font-medium text-faint">ce mois</div>
+                  <div className="text-[10px] font-medium text-faint">dépenses</div>
                 </div>
               </div>
             </div>

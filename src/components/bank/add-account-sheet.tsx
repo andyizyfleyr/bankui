@@ -25,7 +25,9 @@ export function AddAccountSheet({ open, onClose }: { open: boolean; onClose: () 
   const [stage, setStage] = useState<Stage>("edit");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
       setName("");
       setType("courant");
@@ -33,7 +35,7 @@ export function AddAccountSheet({ open, onClose }: { open: boolean; onClose: () 
       setStage("edit");
       setError(null);
     }
-  }, [open]);
+  }
 
   useEffect(() => {
     if (!open) return;
