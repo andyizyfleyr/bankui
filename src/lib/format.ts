@@ -1,18 +1,18 @@
-const eur = new Intl.NumberFormat("fr-FR", {
+const fcfa = new Intl.NumberFormat("fr-FR", {
   style: "currency",
-  currency: "EUR",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  currency: "XOF",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
 });
 
-/** Formate des centimes en euros fr-FR (ex : 2 847,32 €). */
-export function formatEUR(cents: number): string {
-  return eur.format(cents / 100).replace(/\u202f/g, "\u00a0");
+/** Formate des centimes en FCFA fr-FR (ex : 2 847 CFA). */
+export function formatFCFA(cents: number): string {
+  return fcfa.format(cents / 100).replace(/\u202f/g, "\u00a0");
 }
 
-/** Format court : sans décimales quand le montant est rond (ex : 1 000 €). */
-export function formatEURShort(cents: number): string {
-  const s = formatEUR(cents);
+/** Format court : sans décimales quand le montant est rond (ex : 1 000 CFA). */
+export function formatFCFAShort(cents: number): string {
+  const s = formatFCFA(cents);
   return cents % 100 === 0 ? s.replace(/,\d{2}\s*/, "") : s;
 }
 
@@ -46,7 +46,7 @@ export function timeLabel(iso: string): string {
   return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Convertit une chaîne de chiffres (euros entiers) en nombre de centimes borné. */
+/** Convertit une chaîne de chiffres (FCFA entiers) en nombre de centimes borné. */
 export function digitsToCents(digits: string): number {
   const n = parseInt(digits || "0", 10);
   if (Number.isNaN(n)) return 0;
